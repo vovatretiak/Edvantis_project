@@ -23,12 +23,12 @@ class BookType(str, Enum):
 
 
 class Book(BaseModel):
+    id: int
     title: str
     description: str
     year: int
     ISBN: str
     pages: int
-    category: str
     author: List[str]
     genre: BookGenres
     type: BookType
