@@ -41,3 +41,9 @@ def root():
 @app.get("/books/")
 def get_all_books():
     return db
+
+
+@app.post("/books/")
+def create_book(book: Book):
+    db.append(book)
+    return book
