@@ -2,5 +2,6 @@ fastapi
 uvicorn[standart]
 SQLAlchemy
 psycopg2
+alembic
 
 python-dotenv
