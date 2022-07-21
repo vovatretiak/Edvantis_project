@@ -1,6 +1,7 @@
 
-from sqlalchemy import Column, Integer, String, ARRAY
-from database import Base
+from sqlalchemy import ARRAY, Column, Integer, String
+
+from .database import Base
 
 
 class Book(Base):

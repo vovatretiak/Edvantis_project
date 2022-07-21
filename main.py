@@ -1,11 +1,10 @@
 from typing import List
+
 from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
 
-import crud
-import models
-import schemas
+from project import crud, models, schemas
+from project.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
