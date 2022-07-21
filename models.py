@@ -8,9 +8,8 @@ class Book(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    descrition = Column(String, nullable=False)
+    description = Column(String, nullable=True)
     year = Column(Integer, nullable=False)
-    isbn = Column(String, nullable=False)
     image_file = Column(String)
     pages = Column(Integer, nullable=False)
     author = Column(ARRAY(String), nullable=False)
