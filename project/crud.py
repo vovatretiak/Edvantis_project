@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -5,7 +6,15 @@ from . import models, schemas
 
 # crud for books
 def get_book(db: Session, book_id: int):
-    return db.query(models.Book).filter(models.Book.id == book_id).first()
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                'detail': f'Book with id {book_id} is not found'
+            }
+        )
+    return book
 
 
 def get_books(db: Session):
