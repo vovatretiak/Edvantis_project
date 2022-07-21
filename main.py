@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import FastAPI
 
-from models import Book, BookGenres, BookType
+from schemas import Book, BookGenres, BookType
 
 app = FastAPI()
 
