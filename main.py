@@ -1,36 +1,23 @@
 from typing import List
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, status
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
 
-from schemas import Book, BookGenres, BookType
+import crud
+import models
+import schemas
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-db: List[Book] = [
-    Book(
-        id=1,
-        title='First book',
-        description='description for book',
-        year=2000,
-        ISBN='978-966-2355-57-4',
-        pages=200,
-        author=['Jonh Doe', 'Jane doe'],
-        genre=BookGenres.horror,
-        type=BookType.paper,
-        reviews=[]
-    ),
-    Book(
-        id=2,
-        title='Second book',
-        description='description for new book',
-        year=1998,
-        ISBN='978-961-2312-57-3',
-        pages=400,
-        author=['Bob Cat'],
-        genre=BookGenres.comic_book,
-        type=BookType.paper,
-        reviews=['this is cool']
-    )
-]
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/")
@@ -38,12 +25,11 @@ def root():
     return {"message": "Hello World"}
 
 
-@app.get("/books/")
-def get_all_books():
-    return db
+@app.get("/books/", response_model=List[schemas.Book])
+def get_all_books(db: Session = Depends(get_db)):
+    return crud.get_books(db=db)
 
 
-@app.post("/books/")
-def create_book(book: Book):
-    db.append(book)
-    return book
+@app.post("/books/", response_model=schemas.Book, status_code=status.HTTP_201_CREATED)
+def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
+    return crud.create_book(db=db, book=book)
