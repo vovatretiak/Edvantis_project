@@ -22,14 +22,25 @@ class BookType(str, Enum):
     electronic = "Electronic"
 
 
-class Book(BaseModel):
-    id: int
+class BookBase(BaseModel):
     title: str
     description: str
     year: int
     ISBN: str
+    image_file: Optional[str] = None
     pages: int
     author: List[str]
     genre: BookGenres
     type: BookType
     reviews: Optional[List[str]] = None
+
+
+class BookCreate(BookBase):
+    pass
+
+
+class Book(BookBase):
+    id: int
+
+    class Config:
+        orm_mode = True
