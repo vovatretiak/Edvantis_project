@@ -38,7 +38,7 @@ def get_books(db: Session):
 def create_book(db: Session, book: schemas.BookCreate):
     new_book = models.Book(
         title=book.title, description=book.description, year=book.year,
-        image_file=book.image_file, pages=book.pages, author=book.author,
+        image_file=book.image_file, pages=book.pages,
         genre=book.genre, type=book.type, reviews=book.reviews
     )
     db.add(new_book)
