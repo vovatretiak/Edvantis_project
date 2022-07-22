@@ -1,11 +1,13 @@
 from fastapi import HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import values
 from sqlalchemy.orm import Session
 
 from . import models, schemas
 
 
 # crud for books
-def get_book(db: Session, book_id: int):
+def get_book_by_id(db: Session, book_id: int):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     if not book:
         raise HTTPException(
@@ -14,6 +16,18 @@ def get_book(db: Session, book_id: int):
                 'detail': f'Book with id {book_id} is not found'
             }
         )
+    return book
+
+
+# https://sqlmodel.tiangolo.com/tutorial/fastapi/update/
+def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
+    book = get_book_by_id(db=db, book_id=book_id)
+    for key, value in updated_book.dict(exclude_unset=True).items():
+        setattr(book, key, value)
+    print(book)
+    db.add(book)
+    db.commit()
+    db.refresh(book)
     return book
 
 

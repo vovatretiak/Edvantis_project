@@ -17,3 +17,6 @@ class Book(Base):
     genre = Column(String, nullable=False)
     type = Column(String, nullable=False)
     reviews = Column(ARRAY(String), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"Book(id={self.id}, title={self.title})"
