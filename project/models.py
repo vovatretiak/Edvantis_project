@@ -27,8 +27,8 @@ class Book(Base):
 
     authors = relationship(
         'Author', secondary=AuthorBook,
-        back_populates='books',
-        cascade='all, delete')
+        back_populates='books'
+    )
 
     def __repr__(self) -> str:
         return f"Book(id={self.id}, title={self.title})"
@@ -46,7 +46,8 @@ class Author(Base):
     books = relationship(
         'Book', secondary=AuthorBook,
         back_populates='authors',
-        cascade='all, delete')
+        cascade='all, delete',
+    )
 
     def __repr__(self) -> str:
         return f"Author(id={self.id}, first_name={self.first_name})"

@@ -12,7 +12,7 @@ def get_book_by_id(db: Session, book_id: int):
     if not book:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={'detail': f'Book with id {book_id} is not found'}
+            detail=f'Book with id {book_id} is not found'
         )
     return book
 
@@ -20,6 +20,10 @@ def get_book_by_id(db: Session, book_id: int):
 # https://sqlmodel.tiangolo.com/tutorial/fastapi/update/
 def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
     book = get_book_by_id(db=db, book_id=book_id)
+    book_a = db.query(models.Book).get(book_id)
+    book_a.authors.clear()
+    db.add(book_a)
+    db.commit()
     for key, value in updated_book.dict(exclude_unset=True).items():
         if key == "author_id":
             authors = db.query(models.Author).filter(
@@ -29,8 +33,7 @@ def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
             else:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail={'detail': 'Authors is not found'}
-                )
+                    detail='Authors is not found')
         setattr(book, key, value)
 
     db.add(book)
@@ -42,9 +45,8 @@ def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
 def get_books(db: Session):
     return db.query(models.Book).all()
 
+
 # https://stackoverflow.com/questions/68394091/fastapi-sqlalchemy-pydantic-%E2%86%92-how-to-process-many-to-many-relations
-
-
 def create_book(db: Session, book: schemas.BookCreate):
     new_book = models.Book(
         title=book.title, description=book.description, year=book.year,
@@ -58,13 +60,28 @@ def create_book(db: Session, book: schemas.BookCreate):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                'detail': 'Authors is not found'
-            })
+            detail='Authors is not found')
     db.add(new_book)
     db.commit()
     db.refresh(new_book)
     return new_book
+
+
+def delete_book(db: Session, book_id: int):
+    book = db.query(models.Book).filter(models.Book.id == book_id)
+    if not book.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Book with id {book_id} is not found')
+    # remove authors from a book
+    book_a = db.query(models.Book).get(book_id)
+    book_a.authors.clear()
+    db.add(book_a)
+    db.commit()
+    # remove book
+    book.delete()
+    db.commit()
+    return {'Detail': 'Book has been deleted'}
 
 
 # crud for authors
@@ -82,3 +99,24 @@ def create_author(db: Session, author: schemas.AuthorCreate):
 
 def get_authors(db: Session):
     return db.query(models.Author).all()
+
+
+def get_author_by_id(db: Session, author_id: int):
+    author = db.query(models.Author).filter(
+        models.Author.id == author_id).first()
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Author with id {author_id} is not found')
+    return author
+
+
+def delete_author(db: Session, author_id: int):
+    author = db.query(models.Author).filter(models.Author.id == author_id)
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Author with id {author_id} is not found')
+    author.delete()
+    db.commit()
+    return {'Detail': 'Author has been deleted'}
