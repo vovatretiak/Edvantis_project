@@ -1,16 +1,14 @@
-from typing import List
+from fastapi import FastAPI
 
-from fastapi import Depends, FastAPI, status
-from sqlalchemy.orm import Session
-
-from project import crud, models, schemas
-from project.database import SessionLocal, engine
-from project.routers import books
+from project import models
+from project.database import engine
+from project.routers import authors, books
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.include_router(authors.router)
 app.include_router(books.router)
 
 
