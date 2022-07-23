@@ -23,6 +23,8 @@ class Book(Base):
     reviews = Column(ARRAY(String), nullable=True)
     authors_id = Column(ARRAY(Integer))
 
+    authors = relationship('Author', secondary=AuthorBook)
+
     def __repr__(self) -> str:
         return f"Book(id={self.id}, title={self.title})"
 
