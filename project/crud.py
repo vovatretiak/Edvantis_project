@@ -20,12 +20,13 @@ def get_book_by_id(db: Session, book_id: int):
 # https://sqlmodel.tiangolo.com/tutorial/fastapi/update/
 def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
     book = get_book_by_id(db=db, book_id=book_id)
-    book_a = db.query(models.Book).get(book_id)
-    book_a.authors.clear()
-    db.add(book_a)
-    db.commit()
+
     for key, value in updated_book.dict(exclude_unset=True).items():
         if key == "author_id":
+            book_a = db.query(models.Book).get(book_id)
+            book_a.authors.clear()
+            db.add(book_a)
+            db.commit()
             authors = db.query(models.Author).filter(
                 models.Author.id.in_(value))
             if authors.count() == len(value):
@@ -114,6 +115,23 @@ def get_author_by_id(db: Session, author_id: int):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Author with id {author_id} is not found')
+    return author
+
+
+def update_author(db: Session, author_id: int, updated_author: schemas.AuthorUpdate):
+    author = db.query(models.Author).filter(
+        models.Author.id == author_id).first()
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Author with id {author_id} is not found')
+    for key, value in updated_author.dict(exclude_unset=True).items():
+        setattr(author, key, value)
+
+    db.add(author)
+    db.commit()
+    db.refresh(author)
+
     return author
 
 
