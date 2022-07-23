@@ -42,6 +42,12 @@ def update_book(db: Session, book_id: int, updated_book: schemas.BookUpdate):
     return book
 
 
+def get_books_by_author_id(db: Session, author_id: int):
+    author = db.query(models.Author).filter(
+        models.Author.id == author_id).first()
+    return author.books
+
+
 def get_books(db: Session):
     return db.query(models.Book).all()
 
