@@ -3,19 +3,37 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 
+class AuthorBase(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    middle_name: Optional[str]
+    image_file: Optional[str] = None
+
+
+class AuthorCreate(AuthorBase):
+    pass
+
+
+class Author(AuthorBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 class BookBase(BaseModel):
     title: str
     description: str
     year: int
     image_file: Optional[str] = None
     pages: int
-    author_id: List[int]
     genre: str
     type: str
     reviews: Optional[List[str]] = None
 
 
 class BookCreate(BookBase):
+    author_id: List[int] = []
     pass
 
 
@@ -32,17 +50,7 @@ class BookUpdate(BookBase):
 
 class Book(BookBase):
     id: int
+    authors: List[Author] = []
 
     class Config:
         orm_mode = True
-
-
-class AuthorBase(BaseModel):
-    first_name: Optional[str]
-    last_name: Optional[str]
-    middle_name: Optional[str]
-    image_file: Optional[str] = None
-
-
-class AuthorCreate(AuthorBase):
-    pass

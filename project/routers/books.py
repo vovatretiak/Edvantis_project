@@ -1,8 +1,7 @@
-
 from typing import List
 
 from fastapi import APIRouter, Depends, status
-from project import crud, database, models, schemas
+from project import crud, database, schemas
 from sqlalchemy.orm import Session
 
 router = APIRouter(
