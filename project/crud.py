@@ -58,7 +58,7 @@ def create_book(db: Session, book: schemas.BookCreate):
     new_book = models.Book(
         title=book.title, description=book.description, year=book.year,
         image_file=book.image_file, pages=book.pages,
-        genre=book.genre, type=book.type, reviews=book.reviews
+        genre=book.genre, type=book.type
     )
     authors = db.query(models.Author).filter(
         models.Author.id.in_(book.author_id))
@@ -144,3 +144,25 @@ def delete_author(db: Session, author_id: int):
     author.delete()
     db.commit()
     return {'Detail': 'Author has been deleted'}
+
+
+# crud for review
+def create_review(db: Session, review: schemas.ReviewCreate):
+    new_review = models.Review(
+        username=review.username, text=review.text,
+        rating=review.rating, book_id=review.book_id
+    )
+    db.add(new_review)
+    db.commit()
+    book = get_book_by_id(db=db, book_id=review.book_id)
+    book.reviews.append(new_review)
+    db.add(book)
+    db.commit()
+    db.refresh(book)
+    db.refresh(new_review)
+
+    return new_review
+
+
+def get_reviews(db: Session):
+    return db.query(models.Review).all()
