@@ -5,10 +5,18 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 
+class ReviewRating(Enum):
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+
+
 class ReviewBase(BaseModel):
     username: str
     text: str
-    rating: int
+    rating: ReviewRating
     book_id: int
 
 
@@ -19,7 +27,7 @@ class ReviewCreate(ReviewBase):
 class ReviewUpdate(ReviewBase):
     username: Union[str, None] = None
     text: Union[str, None] = None
-    rating: Union[int, None] = None
+    rating: Union[ReviewRating, None] = None
     book_id: Union[int, None] = None
 
 
@@ -65,10 +73,10 @@ class BookGenre(Enum):
     MYSTERY = "Mystery"
     THRILLER = "Thriller"
     HORROR = "Horrror"
-    HISTORICAL = 'Historical'
-    ROMANCE = 'Romance'
-    FANTASY = 'Fantasy'
-    SCI_FI = 'Science Fiction'
+    HISTORICAL = "Historical"
+    ROMANCE = "Romance"
+    FANTASY = "Fantasy"
+    SCI_FI = "Science Fiction"
 
 
 class BookBase(BaseModel):
