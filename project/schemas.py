@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class ReviewRating(Enum):
@@ -47,6 +47,17 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     confirm_password: str
+
+    @validator("confirm_password")
+    def passwords_match(cls, v, values, **kwargs):
+        if "password" in values and v != values["password"]:
+            raise ValueError("passwords do not match")
+        return v
+
+    @validator("username")
+    def username_alphanumeric(cls, v):
+        assert v.isalnum(), "must be alphanumeric"
+        return v
 
 
 class User(UserBase):
