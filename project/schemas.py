@@ -14,7 +14,7 @@ class ReviewRating(Enum):
 
 
 class ReviewBase(BaseModel):
-    username: str
+    user_id: int
     text: str
     rating: ReviewRating
     book_id: int
@@ -25,7 +25,7 @@ class ReviewCreate(ReviewBase):
 
 
 class ReviewUpdate(ReviewBase):
-    username: Union[str, None] = None
+    user_id: Union[int, None] = None
     text: Union[str, None] = None
     rating: Union[ReviewRating, None] = None
     book_id: Union[int, None] = None
@@ -34,6 +34,24 @@ class ReviewUpdate(ReviewBase):
 class Review(ReviewBase):
     id: int
     created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+    confirm_password: str
+
+
+class User(UserBase):
+    id: int
+    reviews: List[Review]
 
     class Config:
         orm_mode = True
