@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
@@ -55,14 +56,29 @@ class Author(AuthorBase):
         orm_mode = True
 
 
+class BookType(Enum):
+    PAPER = "Paper"
+    ELECTRONIC = "Electronic"
+
+
+class BookGenre(Enum):
+    MYSTERY = "Mystery"
+    THRILLER = "Thriller"
+    HORROR = "Horrror"
+    HISTORICAL = 'Historical'
+    ROMANCE = 'Romance'
+    FANTASY = 'Fantasy'
+    SCI_FI = 'Science Fiction'
+
+
 class BookBase(BaseModel):
     title: str
     description: str
     year: int
     image_file: Optional[str] = None
     pages: int
-    genre: str
-    type: str
+    genre: BookGenre
+    type: BookType
 
 
 class BookCreate(BookBase):
@@ -77,8 +93,8 @@ class BookUpdate(BookBase):
     pages: Union[int, None] = None
     author_id: Union[List[int], None] = None
     review_id: Union[List[int], None] = None
-    genre: Union[str, None] = None
-    type: Union[str, None] = None
+    genre: Union[BookGenre, None] = None
+    type: Union[BookType, None] = None
 
 
 class Book(BookBase):
