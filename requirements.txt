@@ -3,5 +3,6 @@ uvicorn[standart]
 SQLAlchemy
 psycopg2
 alembic
+passlib
 
 python-dotenv
