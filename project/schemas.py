@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, root_validator, validator
 
 
 class ReviewRating(Enum):
@@ -42,22 +42,23 @@ class Review(ReviewBase):
 class UserBase(BaseModel):
     username: str
     email: str
-
-
-class UserCreate(UserBase):
     password: str
-    confirm_password: str
-
-    @validator("confirm_password")
-    def passwords_match(cls, v, values, **kwargs):
-        if "password" in values and v != values["password"]:
-            raise ValueError("passwords do not match")
-        return v
 
     @validator("username")
     def username_alphanumeric(cls, v):
         assert v.isalnum(), "must be alphanumeric"
         return v
+
+
+class UserCreate(UserBase):
+    confirm_password: str
+
+    @root_validator
+    def passwords_match(cls, values):
+        pw1, pw2 = values.get("password"), values.get("confirm_password")
+        if pw1 is not None and pw2 is not None and pw1 != pw2:
+            raise ValueError("passwords do not match")
+        return values
 
 
 class User(UserBase):
@@ -73,6 +74,15 @@ class AuthorBase(BaseModel):
     last_name: Optional[str]
     middle_name: Optional[str]
     image_file: Optional[str] = None
+
+    @root_validator(pre=True)
+    def check_names(cls, values):
+        if (
+            "first_name" not in values
+            and "last_name" not in values
+            and "middle_name" not in values
+        ):
+            raise ValueError("Author should have a name")
 
 
 class AuthorCreate(AuthorBase):
@@ -116,6 +126,20 @@ class BookBase(BaseModel):
     pages: int
     genre: BookGenre
     type: BookType
+
+    @validator("year")
+    def year_validation(cls, v):
+        if v > 2022:
+            raise ValueError("The year cannot be greater than the current one")
+        elif v < 1450:
+            raise ValueError("The year cannot be lower than 1450")
+        return v
+
+    @validator("pages")
+    def year_validation(cls, v):
+        if v < 15:
+            raise ValueError("There cannot be less than 15 pages")
+        return v
 
 
 class BookCreate(BookBase):
