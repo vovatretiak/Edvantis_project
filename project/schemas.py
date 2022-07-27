@@ -136,7 +136,7 @@ class BookBase(BaseModel):
         return v
 
     @validator("pages")
-    def year_validation(cls, v):
+    def pages_validation(cls, v):
         if v < 15:
             raise ValueError("There cannot be less than 15 pages")
         return v
