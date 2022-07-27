@@ -227,7 +227,6 @@ def delete_review(db: Session, review_id: int):
     book = (
         db.query(models.Book).filter(models.Book.id == review.first().book_id).first()
     )
-    print(book)
     if not book:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
