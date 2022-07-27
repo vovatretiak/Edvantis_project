@@ -253,9 +253,7 @@ def create_user(user: schemas.UserCreate, db: Session):
             detail=f"User with email '{user.email}' is already exist",
         )
     hashed_pw = get_password_hash(user.password)
-    new_user = models.User(
-        username=user.username, email=user.email, hashed_password=hashed_pw
-    )
+    new_user = models.User(username=user.username, email=user.email, password=hashed_pw)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

@@ -4,5 +4,6 @@ SQLAlchemy
 psycopg2
 alembic
 passlib
+bcrypt
 
 python-dotenv
