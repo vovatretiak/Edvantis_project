@@ -1,8 +1,7 @@
 from fastapi import HTTPException, status
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import values
 from sqlalchemy.orm import Session
 
+from security import get_password_hash
 from . import models, schemas
 
 
@@ -239,3 +238,25 @@ def delete_review(db: Session, review_id: int):
     review.delete()
     db.commit()
     return {"Detail": "Review has been deleted"}
+
+
+# crud for review
+def create_user(user: schemas.UserCreate, db: Session):
+    if db.query(models.User).filter(models.User.username == user.username).first():
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail=f"User with username '{user.username}' is already exist",
+        )
+    if db.query(models.User).filter(models.User.email == user.email).first():
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail=f"User with email '{user.email}' is already exist",
+        )
+    hashed_pw = get_password_hash(user.password)
+    new_user = models.User(
+        username=user.username, email=user.email, hashed_password=hashed_pw
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
