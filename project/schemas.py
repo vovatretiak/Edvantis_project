@@ -50,6 +50,7 @@ class UserBase(BaseModel):
     password: str
 
     @validator("username")
+    @classmethod
     def username_alphanumeric(cls, v):
         assert v.isalnum(), "must be alphanumeric"
         return v
@@ -59,6 +60,7 @@ class UserCreate(UserBase):
     confirm_password: str
 
     @root_validator
+    @classmethod
     def passwords_match(cls, values):
         pw1, pw2 = values.get("password"), values.get("confirm_password")
         if pw1 is not None and pw2 is not None and pw1 != pw2:
@@ -81,6 +83,7 @@ class AuthorBase(BaseModel):
     image_file: Optional[str] = None
 
     @root_validator(pre=True)
+    @classmethod
     def check_names(cls, values):
         if (
             "first_name" not in values
@@ -133,6 +136,7 @@ class BookBase(BaseModel):
     type: BookType
 
     @validator("year")
+    @classmethod
     def year_validation(cls, v):
         if v > 2022:
             raise ValueError("The year cannot be greater than the current one")
@@ -141,6 +145,7 @@ class BookBase(BaseModel):
         return v
 
     @validator("pages")
+    @classmethod
     def pages_validation(cls, v):
         if v < 15:
             raise ValueError("There cannot be less than 15 pages")
