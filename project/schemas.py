@@ -20,7 +20,7 @@ class ReviewRating(Enum):
 
 class ReviewBase(BaseModel):
     user_id: int
-    text: str
+    text: Optional[str]
     rating: ReviewRating
     book_id: int
 
@@ -70,7 +70,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    reviews: List[Review]
+    reviews: List[Review] = []
 
     class Config:
         orm_mode = True
@@ -81,16 +81,6 @@ class AuthorBase(BaseModel):
     last_name: Optional[str]
     middle_name: Optional[str]
     image_file: Optional[str] = None
-
-    @root_validator(pre=True)
-    @classmethod
-    def check_names(cls, values):
-        if (
-            "first_name" not in values
-            and "last_name" not in values
-            and "middle_name" not in values
-        ):
-            raise ValueError("Author should have a name")
 
 
 class AuthorCreate(AuthorBase):
@@ -128,7 +118,7 @@ class BookGenre(Enum):
 
 class BookBase(BaseModel):
     title: str
-    description: str
+    description: Optional[str] = None
     year: int
     image_file: Optional[str] = None
     pages: int

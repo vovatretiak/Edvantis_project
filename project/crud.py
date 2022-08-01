@@ -154,7 +154,7 @@ def delete_author(db: Session, author_id: int):
 # crud for review
 def create_review(db: Session, review: schemas.ReviewCreate):
     new_review = models.Review(
-        username=review.username,
+        user_id=review.user_id,
         text=review.text,
         rating=review.rating,
         book_id=review.book_id,
