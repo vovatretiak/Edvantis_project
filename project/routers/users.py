@@ -1,9 +1,8 @@
-import imp
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from project import crud, database, schemas, utils
+from project import crud, database, schemas, utils, models
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -39,6 +38,7 @@ def get_users(db: Session = Depends(get_db)):
     return crud.get_users(db=db)
 
 
-@router.get("/{username}", response_model=schemas.User, status_code=status.HTTP_200_OK)
-def get_user_by_username(username: str, db: Session = Depends(get_db)):
-    return crud.get_user_by_username(db=db, username=username)
+@router.get("/profile", response_model=schemas.User, status_code=status.HTTP_200_OK)
+def read_users_me(current_user: models.User = Depends(utils.get_current_user)):
+    user = current_user
+    return user

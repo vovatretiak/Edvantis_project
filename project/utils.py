@@ -3,12 +3,19 @@ from datetime import datetime, timedelta
 from typing import Any, Union
 
 from dotenv import find_dotenv, load_dotenv
-from jose import jwt
+from fastapi import Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+from . import database, models, schemas
 
 load_dotenv(find_dotenv())
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -26,7 +33,7 @@ JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]  # secrets.token_hex(30)
 
 def create_access_token(subject: Union[str, Any], expires_delta: int = None):
     if expires_delta:
-        expires_delta = datetime.utcnow() + expires_delta
+        expires_delta = datetime.utcnow() + timedelta(minutes=expires_delta)
     else:
         expires_delta = datetime.utcnow() + timedelta(
             minutes=ACCESS_TOKEN_EXPIRE_MINUTES
@@ -34,3 +41,29 @@ def create_access_token(subject: Union[str, Any], expires_delta: int = None):
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
+
+
+def get_current_user(
+    db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = schemas.TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = (
+        db.query(models.User)
+        .filter(models.User.username == token_data.username)
+        .first()
+    )
+    if user is None:
+        raise credentials_exception
+    return user
