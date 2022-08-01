@@ -268,3 +268,8 @@ def get_user_by_username(db: Session, username: str):
             detail=f"User with username '{user.username}' is not exist",
         )
     return user
+
+
+def get_users(db: Session):
+    users = db.query(models.User).all()
+    return users
