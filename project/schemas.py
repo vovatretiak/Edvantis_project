@@ -113,7 +113,7 @@ class BookType(Enum):
 class BookGenre(Enum):
     MYSTERY = "Mystery"
     THRILLER = "Thriller"
-    HORROR = "Horrror"
+    HORROR = "Horror"
     HISTORICAL = "Historical"
     ROMANCE = "Romance"
     FANTASY = "Fantasy"
