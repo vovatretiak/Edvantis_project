@@ -47,8 +47,8 @@ def get_books_by_author_id(db: Session, author_id: int):
     return author.books
 
 
-def get_books(db: Session):
-    return db.query(models.Book).all()
+def get_books(db: Session, offset: int, limit: int):
+    return db.query(models.Book).offset(offset).limit(limit).all()
 
 
 # https://stackoverflow.com/questions/68394091/fastapi-sqlalchemy-pydantic-%E2%86%92-how-to-process-many-to-many-relations
@@ -109,8 +109,8 @@ def create_author(db: Session, author: schemas.AuthorCreate):
     return new_author
 
 
-def get_authors(db: Session):
-    return db.query(models.Author).all()
+def get_authors(db: Session, offset: int, limit: int):
+    return db.query(models.Author).offset(offset).limit(limit).all()
 
 
 def get_author_by_id(db: Session, author_id: int):
@@ -172,8 +172,8 @@ def create_review(db: Session, review: schemas.ReviewCreate):
     return new_review
 
 
-def get_reviews(db: Session):
-    return db.query(models.Review).all()
+def get_reviews(db: Session, offset: int, limit: int):
+    return db.query(models.Review).offset(offset).limit(limit).all()
 
 
 def get_review_by_id(db: Session, review_id: int):
@@ -271,6 +271,6 @@ def get_user_by_username(db: Session, username: str):
     return user
 
 
-def get_users(db: Session):
-    users = db.query(models.User).all()
+def get_users(db: Session, offset: int, limit: int):
+    users = db.query(models.User).offset(offset).limit(limit).all()
     return users

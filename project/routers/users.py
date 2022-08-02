@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from project import crud, database, schemas, utils, models
 from sqlalchemy.orm import Session
@@ -34,8 +34,12 @@ def login(
 
 
 @router.get("/", response_model=List[schemas.User], status_code=status.HTTP_200_OK)
-def get_users(db: Session = Depends(get_db)):
-    return crud.get_users(db=db)
+def get_users(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=5, lte=10),
+):
+    return crud.get_users(db=db, offset=offset, limit=limit)
 
 
 @router.get("/profile", response_model=schemas.User, status_code=status.HTTP_200_OK)
