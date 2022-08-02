@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from project import crud, database, schemas
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,20 @@ def get_all_books(
     limit: int = Query(default=10, lte=15),
 ):
     return crud.get_books(db=db, offset=offset, limit=limit)
+
+
+@router.get(
+    "/rating/{rating}",
+    response_model=List[schemas.Book],
+    status_code=status.HTTP_200_OK,
+)
+def get_books_with_rating(
+    rating: int = Path(title="The rating of the book", ge=1, le=5),
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=3, lte=5),
+):
+    return crud.get_books_by_rating(db=db, rating=rating, offset=offset, limit=limit)
 
 
 @router.get("/{book_id}", response_model=schemas.Book, status_code=status.HTTP_200_OK)

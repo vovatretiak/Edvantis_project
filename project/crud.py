@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from project.utils import get_password_hash
 
@@ -49,6 +50,24 @@ def get_books_by_author_id(db: Session, author_id: int):
 
 def get_books(db: Session, offset: int, limit: int):
     return db.query(models.Book).offset(offset).limit(limit).all()
+
+
+def get_books_by_rating(db: Session, rating: int, offset: int, limit: int):
+    rating_subquery = (
+        db.query(models.Review.book_id, func.avg(models.Review.rating).label("average"))
+        .group_by(models.Review.book_id)
+        .subquery()
+    )
+    books = (
+        db.query(models.Book)
+        .join(rating_subquery, models.Book.id == rating_subquery.c.book_id)
+        .where(rating_subquery.c.average >= rating)
+        .order_by(rating_subquery.c.average.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return books
 
 
 # https://stackoverflow.com/questions/68394091/fastapi-sqlalchemy-pydantic-%E2%86%92-how-to-process-many-to-many-relations
