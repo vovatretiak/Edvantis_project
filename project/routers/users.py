@@ -1,8 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
-from project import crud, database, schemas, utils, models
+from project import crud, database, models, schemas, utils
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users", tags=["Users"])

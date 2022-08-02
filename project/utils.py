@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Union
 
 from dotenv import find_dotenv, load_dotenv
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
