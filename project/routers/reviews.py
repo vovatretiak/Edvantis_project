@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from project import crud, database, schemas
 from sqlalchemy.orm import Session
 
@@ -15,8 +15,12 @@ def create_review(review: schemas.ReviewCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[schemas.Review], status_code=status.HTTP_200_OK)
-def get_all_reviews(db: Session = Depends(get_db)):
-    return crud.get_reviews(db=db)
+def get_all_reviews(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=10, lte=15),
+):
+    return crud.get_reviews(db=db, offset=offset, limit=limit)
 
 
 @router.get(
