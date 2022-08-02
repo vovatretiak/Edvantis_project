@@ -1,10 +1,20 @@
+from __future__ import annotations
+
 from typing import List
 
-from fastapi import APIRouter, Depends, Path, Query, status
-from project import crud, database, schemas
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import Path
+from fastapi import Query
+from fastapi import status
 from sqlalchemy.orm import Session
 
+from project import crud
+from project import database
+from project import schemas
+
 router = APIRouter(prefix="/books", tags=["Books"])
+
 
 get_db = database.get_db
 

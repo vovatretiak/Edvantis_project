@@ -1,15 +1,26 @@
-import os
-from datetime import datetime, timedelta
-from typing import Any, Union
+from __future__ import annotations
 
-from dotenv import find_dotenv, load_dotenv
-from fastapi import Depends, HTTPException, status
+import os
+from datetime import datetime
+from datetime import timedelta
+from typing import Any
+from typing import Union
+
+from dotenv import find_dotenv
+from dotenv import load_dotenv
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt
+from jose import JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from . import database, models, schemas
+from . import database
+from . import models
+from . import schemas
+
 
 load_dotenv(find_dotenv())
 
@@ -31,7 +42,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]  # secrets.token_hex(30)
 
 
-def create_access_token(subject: Union[str, Any], expires_delta: int = None):
+def create_access_token(subject: str | Any, expires_delta: int = None):
     if expires_delta:
         expires_delta = datetime.utcnow() + timedelta(minutes=expires_delta)
     else:

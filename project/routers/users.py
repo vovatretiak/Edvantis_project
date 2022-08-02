@@ -1,11 +1,23 @@
+from __future__ import annotations
+
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import Query
+from fastapi import status
 from fastapi.security import OAuth2PasswordRequestForm
-from project import crud, database, models, schemas, utils
 from sqlalchemy.orm import Session
 
+from project import crud
+from project import database
+from project import models
+from project import schemas
+from project import utils
+
 router = APIRouter(prefix="/users", tags=["Users"])
+
 
 get_db = database.get_db
 

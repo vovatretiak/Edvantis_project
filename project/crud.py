@@ -1,10 +1,13 @@
-from fastapi import HTTPException, status
+from __future__ import annotations
+
+from fastapi import HTTPException
+from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
+from . import models
+from . import schemas
 from project.utils import get_password_hash
-
-from . import models, schemas
 
 
 # crud for books
