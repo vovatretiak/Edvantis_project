@@ -52,6 +52,7 @@ def get_books(db: Session, offset: int, limit: int):
     return db.query(models.Book).offset(offset).limit(limit).all()
 
 
+# https://blog.miguelgrinberg.com/post/nested-queries-with-sqlalchemy-orm
 def get_books_by_rating(db: Session, rating: int, offset: int, limit: int):
     rating_subquery = (
         db.query(models.Review.book_id, func.avg(models.Review.rating).label("average"))
