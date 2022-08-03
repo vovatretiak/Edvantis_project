@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 
 from sqlalchemy import Column
@@ -24,6 +22,10 @@ AuthorBook = Table(
 
 
 class Book(Base):
+    """
+    Books table contains main information about books
+    """
+
     __tablename__ = "books"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -39,10 +41,17 @@ class Book(Base):
     authors = relationship("Author", secondary=AuthorBook, back_populates="books")
 
     def __repr__(self) -> str:
-        return f"Book(id={self.id}, title={self.title})"
+        return f"Book(id={self.id}, title={self.title}, year={self.year}, genre={self.genre}, type={self.type})"
+
+    def __str__(self) -> str:
+        return str(self.__dict__)
 
 
 class Author(Base):
+    """
+    Authors table contains main information about authors
+    """
+
     __tablename__ = "authors"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -58,9 +67,17 @@ class Author(Base):
     def __repr__(self) -> str:
         return f"Author(id={self.id}, first_name={self.first_name})"
 
+    def __str__(self) -> str:
+        return str(self.__dict__)
+
 
 class Review(Base):
+    """
+    Reviews table contains main information about reviews
+    """
+
     __tablename__ = "reviews"
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     text = Column(String)
@@ -71,12 +88,29 @@ class Review(Base):
     book = relationship("Book", back_populates="reviews")
     user = relationship("User", back_populates="reviews")
 
+    def __repr__(self) -> str:
+        return f"Review(id={self.id}, user_id={self.user_id}, created_at={self.created_at})"
+
+    def __str__(self) -> str:
+        return str(self.__dict__)
+
 
 class User(Base):
+    """
+    Users table contains main information about users
+    """
+
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
 
     reviews = relationship("Review", back_populates="user", cascade="all, delete")
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id}, username={self.username}, email={self.email})"
+
+    def __str__(self) -> str:
+        return str(self.__dict__)

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
 from typing import List
@@ -17,7 +15,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Union[str, None] = None
 
 
 class ReviewRating(Enum):
@@ -30,7 +28,7 @@ class ReviewRating(Enum):
 
 class ReviewBase(BaseModel):
     user_id: int
-    text: str | None
+    text: Union[str, None]
     rating: ReviewRating
     book_id: int
 
@@ -40,10 +38,10 @@ class ReviewCreate(ReviewBase):
 
 
 class ReviewUpdate(ReviewBase):
-    user_id: int | None = None
-    text: str | None = None
-    rating: ReviewRating | None = None
-    book_id: int | None = None
+    user_id: Union[int, None] = None
+    text: Union[str, None] = None
+    rating: Union[ReviewRating, None] = None
+    book_id: Union[int, None] = None
 
 
 class Review(ReviewBase):
@@ -80,17 +78,17 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    reviews: list[Review] = []
+    reviews: List[Review] = []
 
     class Config:
         orm_mode = True
 
 
 class AuthorBase(BaseModel):
-    first_name: str | None
-    last_name: str | None
-    middle_name: str | None
-    image_file: str | None = None
+    first_name: Union[str, None]
+    last_name: Union[str, None]
+    middle_name: Union[str, None]
+    image_file: Union[str, None] = None
 
 
 class AuthorCreate(AuthorBase):
@@ -98,10 +96,10 @@ class AuthorCreate(AuthorBase):
 
 
 class AuthorUpdate(BaseModel):
-    first_name: str | None = None
-    last_name: str | None = None
-    middle_name: str | None = None
-    image_file: str | None = None
+    first_name: Union[str, None] = None
+    last_name: Union[str, None] = None
+    middle_name: Union[str, None] = None
+    image_file: Union[str, None] = None
 
 
 class Author(AuthorBase):
@@ -128,9 +126,9 @@ class BookGenre(Enum):
 
 class BookBase(BaseModel):
     title: str
-    description: str | None = None
+    description: Union[str, None] = None
     year: int
-    image_file: str | None = None
+    image_file: Union[str, None] = None
     pages: int
     genre: BookGenre
     type: BookType
@@ -153,25 +151,25 @@ class BookBase(BaseModel):
 
 
 class BookCreate(BookBase):
-    author_id: list[int] = []
+    author_id: List[int] = []
 
 
 class BookUpdate(BookBase):
-    title: str | None = None
-    description: str | None = None
-    year: int | None = None
-    image_file: str | None = None
-    pages: int | None = None
-    author_id: list[int] | None = None
-    review_id: list[int] | None = None
-    genre: BookGenre | None = None
-    type: BookType | None = None
+    title: Union[str, None] = None
+    description: Union[str, None] = None
+    year: Union[int, None] = None
+    image_file: Union[str, None] = None
+    pages: Union[int, None] = None
+    author_id: Union[List[int], None] = None
+    review_id: Union[List[int], None] = None
+    genre: Union[BookGenre, None] = None
+    type: Union[BookType, None] = None
 
 
 class Book(BookBase):
     id: int
-    authors: list[Author] = []
-    reviews: list[Review] = []
+    authors: List[Author] = []
+    reviews: List[Review] = []
 
     class Config:
         orm_mode = True

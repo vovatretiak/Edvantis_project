@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 from datetime import datetime
 from datetime import timedelta
@@ -42,7 +40,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]  # secrets.token_hex(30)
 
 
-def create_access_token(subject: str | Any, expires_delta: int = None):
+def create_access_token(subject: Union[str, Any], expires_delta: int = None):
     if expires_delta:
         expires_delta = datetime.utcnow() + timedelta(minutes=expires_delta)
     else:
