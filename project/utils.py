@@ -27,11 +27,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
 
-def verify_password(plain_password: str, hashed_password: str):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """verify password
+
+    Args:
+        plain_password (str): password to check
+        hashed_password (str): hashed password from db
+
+    Returns:
+        bool: returns true or false
+    """
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password: str):
+def get_password_hash(password: str) -> str:
+    """gets hashed password
+
+    Args:
+        password (str): user password
+
+    Returns:
+        str: hashed password
+    """
     return pwd_context.hash(password)
 
 
@@ -40,7 +57,16 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]  # secrets.token_hex(30)
 
 
-def create_access_token(subject: Union[str, Any], expires_delta: int = None):
+def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+    """creates access token
+
+    Args:
+        subject (Union[str, Any]): data from the authorization form
+        expires_delta (int, optional): time delta. Defaults to None.
+
+    Returns:
+        str: JWT
+    """
     if expires_delta:
         expires_delta = datetime.utcnow() + timedelta(minutes=expires_delta)
     else:
@@ -54,7 +80,19 @@ def create_access_token(subject: Union[str, Any], expires_delta: int = None):
 
 def get_current_user(
     db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)
-):
+) -> models.User:
+    """gets current user from database if credentials is valid
+
+    Args:
+        db (Session, optional): Defaults to Depends(database.get_db).
+        token (str, optional): Defaults to Depends(oauth2_scheme).
+
+    Raises:
+        credentials_exception: Handle wrong credentials
+
+    Returns:
+        models.User: returns current user
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -64,10 +102,10 @@ def get_current_user(
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
+            return credentials_exception
         token_data = schemas.TokenData(username=username)
     except JWTError:
-        raise credentials_exception
+        return credentials_exception
     user = (
         db.query(models.User)
         .filter(models.User.username == token_data.username)

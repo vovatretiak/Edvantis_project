@@ -41,7 +41,8 @@ class Book(Base):
     authors = relationship("Author", secondary=AuthorBook, back_populates="books")
 
     def __repr__(self) -> str:
-        return f"Book(id={self.id}, title={self.title}, year={self.year}, genre={self.genre}, type={self.type})"
+        return f"Book(id={self.id}, title={self.title}, \
+             year={self.year}, genre={self.genre}, type={self.type})"
 
     def __str__(self) -> str:
         return str(self.__dict__)
