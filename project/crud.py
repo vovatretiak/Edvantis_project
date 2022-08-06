@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import HTTPException
 from fastapi import status
+from sqlalchemy import subquery
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -101,7 +102,6 @@ def get_books(db: Session, offset: int, limit: int) -> List[models.Book]:
     return db.query(models.Book).offset(offset).limit(limit).all()
 
 
-# https://blog.miguelgrinberg.com/post/nested-queries-with-sqlalchemy-orm
 def get_books_by_rating(
     db: Session, rating: int, offset: int, limit: int
 ) -> List[models.Book]:
@@ -116,16 +116,42 @@ def get_books_by_rating(
     Returns:
         List[models.Book]: returns list of instances of Book model with specific rating
     """
-    rating_subquery = (
-        db.query(models.Review.book_id, func.avg(models.Review.rating).label("average"))
-        .group_by(models.Review.book_id)
-        .subquery()
+    books = (
+        db.query(models.Book)
+        .where(models.Book.rating >= rating)
+        .order_by(models.Book.rating.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return books
+
+
+def get_recommendations(
+    db: Session, genre: str, offset: int, limit: int
+) -> List[models.Book]:
+    """gets list of instances of Book model from database with specific genre
+
+    Args:
+        db (Session): Manages persistence operations for ORM-mapped objects
+        genre (str): Path parameter, preferred genre
+        offset (int): Query parameter, the number of items to skip before returning
+        limit (int): Query parameter, the number of items returned from a query
+
+    Returns:
+        List[models.Book]: returns list of instances of Book model with pregerred genre
+    """
+    avg_rating = (
+        db.query(func.avg(models.Book.rating))
+        .filter(models.Book.genre == genre)
+        .group_by(models.Book.genre)
+        .scalar_subquery()
     )
     books = (
         db.query(models.Book)
-        .join(rating_subquery, models.Book.id == rating_subquery.c.book_id)
-        .where(rating_subquery.c.average >= rating)
-        .order_by(rating_subquery.c.average.desc())
+        .filter(models.Book.genre == genre)
+        .where(models.Book.rating >= avg_rating)
+        .order_by(models.Book.rating.desc())
         .offset(offset)
         .limit(limit)
         .all()
