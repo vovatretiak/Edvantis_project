@@ -44,7 +44,6 @@ class ReviewBase(BaseModel):
     ReviewBase schema describes basic review by user_id, text, rating and book_id
     """
 
-    user_id: int
     text: Union[str, None]
     rating: ReviewRating
     book_id: int
@@ -74,6 +73,7 @@ class Review(ReviewBase):
     """
 
     id: int
+    user_id: int
     created_at: datetime
 
     class Config:

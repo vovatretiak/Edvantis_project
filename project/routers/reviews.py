@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from project import crud
 from project import database
+from project import models
 from project import schemas
+from project import utils
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
@@ -18,7 +20,9 @@ get_db = database.get_db
 
 @router.post("/", response_model=schemas.Review, status_code=status.HTTP_201_CREATED)
 def create_review(
-    review: schemas.ReviewCreate, db: Session = Depends(get_db)
+    review: schemas.ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """post method to create new review
 
@@ -29,7 +33,7 @@ def create_review(
     Returns:
         schemas.Review
     """
-    return crud.create_review(db=db, review=review)
+    return crud.create_review(db=db, review=review, user=current_user)
 
 
 @router.get("/", response_model=List[schemas.Review], status_code=status.HTTP_200_OK)

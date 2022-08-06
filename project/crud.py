@@ -344,25 +344,34 @@ def delete_author(db: Session, author_id: int) -> None:
 
 
 # crud for review
-def create_review(db: Session, review: schemas.ReviewCreate) -> models.Review:
+def create_review(
+    db: Session, review: schemas.ReviewCreate, user: models.User
+) -> models.Review:
     """creates instance of Review model and adds it to database
 
     Args:
         db (Session): Manages persistence operations for ORM-mapped objects
         review (schemas.ReviewCreate): New Review instance
+    Raises:
+        HTTPException: Handles no value
 
     Returns:
         returns instance of Review model
     """
+    book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Book with id {review.book_id} is not found",
+        )
     new_review = models.Review(
-        user_id=review.user_id,
+        user_id=user.id,
         text=review.text,
         rating=review.rating,
         book_id=review.book_id,
     )
     db.add(new_review)
     db.commit()
-    book = get_book_by_id(db=db, book_id=review.book_id)
     book.reviews.append(new_review)
     rating = (
         db.query(func.avg(models.Review.rating))
