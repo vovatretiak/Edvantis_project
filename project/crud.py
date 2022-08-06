@@ -485,7 +485,7 @@ def update_review(
     return review
 
 
-def delete_review(db: Session, review_id: int) -> None:
+def delete_review(db: Session, review_id: int, user: models.User) -> None:
     """deletes instance of Review model from database by its id
 
     Args:
@@ -500,6 +500,11 @@ def delete_review(db: Session, review_id: int) -> None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review with id {review_id} is not found",
+        )
+    if review.first().user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
         )
     book = (
         db.query(models.Book).filter(models.Book.id == review.first().book_id).first()

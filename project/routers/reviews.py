@@ -96,11 +96,15 @@ def update_review(
 
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_review(review_id: int, db: Session = Depends(get_db)) -> None:
+def delete_review(
+    review_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
+) -> None:
     """delete method to delete review by its id
 
     Args:
         review_id (int)
         db (Session, optional): Defaults to Depends(get_db).
     """
-    return crud.delete_review(db=db, review_id=review_id)
+    return crud.delete_review(db=db, review_id=review_id, user=current_user)
