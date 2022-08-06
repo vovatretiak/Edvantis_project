@@ -7,6 +7,7 @@ from typing import Union
 from pydantic import BaseModel
 from pydantic import root_validator
 from pydantic import validator
+from strenum import StrEnum
 
 
 class Token(BaseModel):
@@ -170,7 +171,7 @@ class Author(AuthorBase):
         orm_mode = True
 
 
-class BookType(Enum):
+class BookType(StrEnum):
     """
     Enum class for books type
     """
@@ -179,7 +180,7 @@ class BookType(Enum):
     ELECTRONIC = "Electronic"
 
 
-class BookGenre(Enum):
+class BookGenre(StrEnum):
     """
     Enum class for books genre
     """

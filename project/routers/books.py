@@ -78,6 +78,31 @@ def get_books_with_rating(
     return crud.get_books_by_rating(db=db, rating=rating, offset=offset, limit=limit)
 
 
+@router.get(
+    "/recommendations/{genre}",
+    response_model=List[schemas.Book],
+    status_code=status.HTTP_200_OK,
+)
+def get_recommendations(
+    genre: schemas.BookGenre,
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = Query(default=3, lte=5),
+) -> List[schemas.Book]:
+    """gets list of instances of Book model from database with specific genre
+
+    Args:
+        genre (schemas.BookGenre): _description_
+        db (Session, optional): Defaults to Depends(get_db).
+        offset (int, optional): Defaults to 0.
+        limit (int, optional): Defaults to Query(default=3, lte=5).
+
+    Returns:
+        List[schemas.Book]
+    """
+    return crud.get_recommendations(db=db, genre=genre, offset=offset, limit=limit)
+
+
 @router.get("/{book_id}", response_model=schemas.Book, status_code=status.HTTP_200_OK)
 def get_book_by_id(book_id: int, db: Session = Depends(get_db)) -> schemas.Book:
     """get method to show book by its id
