@@ -101,3 +101,22 @@ def read_users_me(
     """
     user = current_user
     return user
+
+
+@router.put(
+    "/profile", response_model=schemas.User, status_code=status.HTTP_202_ACCEPTED
+)
+def update_users_me(
+    updated_user: schemas.UserUpdate,
+    current_user: models.User = Depends(utils.get_current_user),
+    db: Session = Depends(get_db),
+) -> schemas.User:
+    """put method to update current user
+
+    Args:
+        current_user (models.User, optional): Defaults to Depends(utils.get_current_user).
+
+    Returns:
+        schemas.User
+    """
+    return crud.update_user(db=db, current_user=current_user, updated_user=updated_user)

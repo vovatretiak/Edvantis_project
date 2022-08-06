@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import HTTPException
 from fastapi import status
-from sqlalchemy import subquery
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -589,3 +588,44 @@ def get_users(db: Session, offset: int, limit: int) -> List[models.User]:
     """
     users = db.query(models.User).offset(offset).limit(limit).all()
     return users
+
+
+def update_user(
+    db: Session, current_user: models.User, updated_user: schemas.UserUpdate
+) -> models.User:
+    c_user = (
+        db.query(models.User)
+        .filter(models.User.username == current_user.username)
+        .first()
+    )
+    if updated_user.username:
+        user = (
+            db.query(models.User)
+            .filter(models.User.username == updated_user.username)
+            .first()
+        )
+        if user:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"User with username '{updated_user.username}' is already exist",
+            )
+        c_user.username = updated_user.username
+    if updated_user.email:
+        user = (
+            db.query(models.User)
+            .filter(models.User.email == updated_user.email)
+            .first()
+        )
+        if user:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"User with email '{updated_user.email}' is already exist",
+            )
+        c_user.email = updated_user.email
+    if updated_user.password and updated_user.confirm_password:
+        hashed_pw = get_password_hash(updated_user.password)
+        c_user.password = hashed_pw
+    db.add(c_user)
+    db.commit()
+    db.refresh(c_user)
+    return c_user

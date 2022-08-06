@@ -116,6 +116,26 @@ class UserCreate(UserBase):
         return values
 
 
+class UserUpdate(UserBase):
+    """
+    UserUpdate schema to update user with username, text, email, password and confirm_password
+    """
+
+    username: Union[str, None] = None
+    email: Union[str, None] = None
+    password: Union[str, None] = None
+    confirm_password: Union[str, None] = None
+
+    @root_validator
+    @classmethod
+    def passwords_match(cls, values):
+        """checks if the password and the confirm_password match"""
+        pw1, pw2 = values.get("password", None), values.get("confirm_password", None)
+        if pw1 is not None and pw2 is not None and pw1 == pw2:
+            return values
+        raise ValueError("passwords do not match")
+
+
 class User(UserBase):
     """
     User schema to show user with its id, username, text, email, password and list of reviews
