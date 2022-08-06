@@ -190,6 +190,17 @@ def delete_book(db: Session, book_id: int) -> None:
     book_a.authors.clear()
     db.add(book_a)
     db.commit()
+    # delete reviews
+    book_r = (
+        db.query(models.Book)
+        .join(models.Book.reviews)
+        .filter(models.Book.id == 1)
+        .first()
+    )
+    for review in book_r.reviews:
+        r = db.query(models.Review).filter(models.Review.id == review.id)
+        r.delete()
+        db.commit()
     # remove book
     book.delete()
     db.commit()
