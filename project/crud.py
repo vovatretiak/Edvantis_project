@@ -593,6 +593,19 @@ def get_users(db: Session, offset: int, limit: int) -> List[models.User]:
 def update_user(
     db: Session, current_user: models.User, updated_user: schemas.UserUpdate
 ) -> models.User:
+    """updates current user
+
+    Args:
+        db (Session): Manages persistence operations for ORM-mapped objects
+        current_user (models.User): current user model
+        updated_user (schemas.UserUpdate): updated user schema
+
+    Raises:
+        HTTPException: Hande invalid value
+
+    Returns:
+        models.User
+    """
     c_user = (
         db.query(models.User)
         .filter(models.User.username == current_user.username)
@@ -629,3 +642,15 @@ def update_user(
     db.commit()
     db.refresh(c_user)
     return c_user
+
+
+def delete_user(db: Session, current_user: models.User) -> None:
+    """deletes current user
+
+    Args:
+        db (Session): Manages persistence operations for ORM-mapped objects
+        current_user (models.User): current user model
+    """
+    user = db.query(models.User).filter(models.User.username == current_user.username)
+    user.delete()
+    db.commit()
