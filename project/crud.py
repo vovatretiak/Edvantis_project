@@ -333,7 +333,7 @@ def create_review(db: Session, review: schemas.ReviewCreate) -> models.Review:
         .group_by(models.Review.book_id)
         .first()
     )
-    book.rating = rating
+    book.rating = float(rating[0])
     db.add(book)
     db.commit()
     db.refresh(book)
