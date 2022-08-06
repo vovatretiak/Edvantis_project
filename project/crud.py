@@ -327,6 +327,13 @@ def create_review(db: Session, review: schemas.ReviewCreate) -> models.Review:
     db.commit()
     book = get_book_by_id(db=db, book_id=review.book_id)
     book.reviews.append(new_review)
+    rating = (
+        db.query(func.avg(models.Review.rating))
+        .filter(models.Review.book_id == review.book_id)
+        .group_by(models.Review.book_id)
+        .first()
+    )
+    book.rating = rating
     db.add(book)
     db.commit()
     db.refresh(book)

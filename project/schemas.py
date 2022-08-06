@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from enum import IntEnum
 from typing import List
 from typing import Union
 
@@ -25,7 +26,7 @@ class TokenData(BaseModel):
     username: Union[str, None] = None
 
 
-class ReviewRating(Enum):
+class ReviewRating(IntEnum):
     """
     Enum class for review rating
     """
@@ -258,6 +259,7 @@ class Book(BookBase):
     """
 
     id: int
+    rating: float
     authors: List[Author] = []
     reviews: List[Review] = []
 

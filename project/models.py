@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column
 from sqlalchemy import DateTime
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -33,6 +34,7 @@ class Book(Base):
     description = Column(String, nullable=True)
     year = Column(Integer, nullable=False)
     image_file = Column(String)
+    rating = Column(Float(decimal_return_scale=2), default=0)
     pages = Column(Integer, nullable=False)
     genre = Column(String, nullable=False)
     type = Column(String, nullable=False)
