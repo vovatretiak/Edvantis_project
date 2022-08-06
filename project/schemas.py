@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from enum import IntEnum
 from typing import List
+from typing import Optional
 from typing import Union
 
 from pydantic import BaseModel
@@ -44,7 +45,6 @@ class ReviewBase(BaseModel):
     ReviewBase schema describes basic review by user_id, text, rating and book_id
     """
 
-    user_id: int
     text: Union[str, None]
     rating: ReviewRating
     book_id: int
@@ -62,10 +62,9 @@ class ReviewUpdate(ReviewBase):
     ReviewUpdate schema to update review with user_id, text, rating and book_id
     """
 
-    user_id: Union[int, None] = None
-    text: Union[str, None] = None
-    rating: Union[ReviewRating, None] = None
-    book_id: Union[int, None] = None
+    text: Union[None, str] = None
+    rating: Union[None, int] = None
+    book_id: Union[None, int] = None
 
 
 class Review(ReviewBase):
@@ -74,6 +73,7 @@ class Review(ReviewBase):
     """
 
     id: int
+    user_id: int
     created_at: datetime
 
     class Config:
@@ -114,6 +114,26 @@ class UserCreate(UserBase):
         if pw1 is not None and pw2 is not None and pw1 != pw2:
             raise ValueError("passwords do not match")
         return values
+
+
+class UserUpdate(UserBase):
+    """
+    UserUpdate schema to update user with username, text, email, password and confirm_password
+    """
+
+    username: Union[str, None] = None
+    email: Union[str, None] = None
+    password: Union[str, None] = None
+    confirm_password: Union[str, None] = None
+
+    @root_validator
+    @classmethod
+    def passwords_match(cls, values):
+        """checks if the password and the confirm_password match"""
+        pw1, pw2 = values.get("password", None), values.get("confirm_password", None)
+        if pw1 is not None and pw2 is not None and pw1 == pw2:
+            return values
+        raise ValueError("passwords do not match")
 
 
 class User(UserBase):

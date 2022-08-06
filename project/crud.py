@@ -2,7 +2,6 @@ from typing import List
 
 from fastapi import HTTPException
 from fastapi import status
-from sqlalchemy import subquery
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -344,25 +343,34 @@ def delete_author(db: Session, author_id: int) -> None:
 
 
 # crud for review
-def create_review(db: Session, review: schemas.ReviewCreate) -> models.Review:
+def create_review(
+    db: Session, review: schemas.ReviewCreate, user: models.User
+) -> models.Review:
     """creates instance of Review model and adds it to database
 
     Args:
         db (Session): Manages persistence operations for ORM-mapped objects
         review (schemas.ReviewCreate): New Review instance
+    Raises:
+        HTTPException: Handles no value
 
     Returns:
         returns instance of Review model
     """
+    book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Book with id {review.book_id} is not found",
+        )
     new_review = models.Review(
-        user_id=review.user_id,
+        user_id=user.id,
         text=review.text,
         rating=review.rating,
         book_id=review.book_id,
     )
     db.add(new_review)
     db.commit()
-    book = get_book_by_id(db=db, book_id=review.book_id)
     book.reviews.append(new_review)
     rating = (
         db.query(func.avg(models.Review.rating))
@@ -416,7 +424,7 @@ def get_review_by_id(db: Session, review_id: int) -> models.Review:
 
 
 def update_review(
-    db: Session, review_id: int, updated_review: schemas.ReviewCreate
+    db: Session, review_id: int, updated_review: schemas.ReviewUpdate, user: models.User
 ) -> models.Review:
     """updates instance of Review model from database by its id
 
@@ -426,7 +434,7 @@ def update_review(
         updated_review (schemas.ReviewCreate): Review schema with updated values
 
     Raises:
-        HTTPException: Handle no value
+        HTTPException: Handle no value or if access is granted
 
     Returns:
         returns updated instance of Review model
@@ -437,31 +445,46 @@ def update_review(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review with id {review_id} is not found",
         )
-    book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
-    if review.book_id != updated_review.book_id:
-        book.reviews.remove(review)
-        db.add(book)
+    if review.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    if updated_review.dict(exclude_unset=True).get("book_id"):
+        new_book = (
+            db.query(models.Book)
+            .filter(models.Book.id == updated_review.book_id)
+            .first()
+        )
+        if not new_book:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Book with id {review.book_id} is not found",
+            )
+        new_book.reviews.append(review)
+        db.add(new_book)
         db.commit()
-        db.refresh(book)
+        db.refresh(new_book)
+
+        old_book = (
+            db.query(models.Book).filter(models.Book.id == review.book_id).first()
+        )
+        if review.book_id != updated_review.book_id:
+            old_book.reviews.remove(review)
+            db.add(old_book)
+            db.commit()
+            db.refresh(old_book)
+
     for key, value in updated_review.dict(exclude_unset=True).items():
         setattr(review, key, value)
-    new_book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
-    if not new_book:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with id {review.book_id} is not found",
-        )
-    new_book.reviews.append(review)
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
+
     db.add(review)
     db.commit()
     db.refresh(review)
     return review
 
 
-def delete_review(db: Session, review_id: int) -> None:
+def delete_review(db: Session, review_id: int, user: models.User) -> None:
     """deletes instance of Review model from database by its id
 
     Args:
@@ -476,6 +499,11 @@ def delete_review(db: Session, review_id: int) -> None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review with id {review_id} is not found",
+        )
+    if review.first().user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
         )
     book = (
         db.query(models.Book).filter(models.Book.id == review.first().book_id).first()
@@ -560,3 +588,69 @@ def get_users(db: Session, offset: int, limit: int) -> List[models.User]:
     """
     users = db.query(models.User).offset(offset).limit(limit).all()
     return users
+
+
+def update_user(
+    db: Session, current_user: models.User, updated_user: schemas.UserUpdate
+) -> models.User:
+    """updates current user
+
+    Args:
+        db (Session): Manages persistence operations for ORM-mapped objects
+        current_user (models.User): current user model
+        updated_user (schemas.UserUpdate): updated user schema
+
+    Raises:
+        HTTPException: Hande invalid value
+
+    Returns:
+        models.User
+    """
+    c_user = (
+        db.query(models.User)
+        .filter(models.User.username == current_user.username)
+        .first()
+    )
+    if updated_user.username:
+        user = (
+            db.query(models.User)
+            .filter(models.User.username == updated_user.username)
+            .first()
+        )
+        if user:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"User with username '{updated_user.username}' is already exist",
+            )
+        c_user.username = updated_user.username
+    if updated_user.email:
+        user = (
+            db.query(models.User)
+            .filter(models.User.email == updated_user.email)
+            .first()
+        )
+        if user:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"User with email '{updated_user.email}' is already exist",
+            )
+        c_user.email = updated_user.email
+    if updated_user.password and updated_user.confirm_password:
+        hashed_pw = get_password_hash(updated_user.password)
+        c_user.password = hashed_pw
+    db.add(c_user)
+    db.commit()
+    db.refresh(c_user)
+    return c_user
+
+
+def delete_user(db: Session, current_user: models.User) -> None:
+    """deletes current user
+
+    Args:
+        db (Session): Manages persistence operations for ORM-mapped objects
+        current_user (models.User): current user model
+    """
+    user = db.query(models.User).filter(models.User.username == current_user.username)
+    user.delete()
+    db.commit()

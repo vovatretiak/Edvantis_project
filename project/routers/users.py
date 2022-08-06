@@ -88,7 +88,7 @@ def get_users(
 
 
 @router.get("/profile", response_model=schemas.User, status_code=status.HTTP_200_OK)
-def read_users_me(
+def read_me(
     current_user: models.User = Depends(utils.get_current_user),
 ) -> schemas.User:
     """get method to show current user
@@ -101,3 +101,37 @@ def read_users_me(
     """
     user = current_user
     return user
+
+
+@router.put(
+    "/profile", response_model=schemas.User, status_code=status.HTTP_202_ACCEPTED
+)
+def update_me(
+    updated_user: schemas.UserUpdate,
+    current_user: models.User = Depends(utils.get_current_user),
+    db: Session = Depends(get_db),
+) -> schemas.User:
+    """put method to update current user
+
+    Args:
+        db (Session, optional)  Defaults to Depends(get_db).
+        updated_user (schemas.UserUpdate)
+        current_user (models.User, optional): Defaults to Depends(utils.get_current_user).
+
+    Returns:
+        schemas.User
+    """
+    return crud.update_user(db=db, current_user=current_user, updated_user=updated_user)
+
+
+@router.delete("/profile", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    current_user: models.User = Depends(utils.get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    """delete method to delete current user
+
+    Args:
+        current_user (models.User, optional): Defaults to Depends(utils.get_current_user).
+    """
+    return crud.delete_user(db=db, current_user=current_user)

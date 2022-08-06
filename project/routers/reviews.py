@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from project import crud
 from project import database
+from project import models
 from project import schemas
+from project import utils
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
@@ -18,7 +20,9 @@ get_db = database.get_db
 
 @router.post("/", response_model=schemas.Review, status_code=status.HTTP_201_CREATED)
 def create_review(
-    review: schemas.ReviewCreate, db: Session = Depends(get_db)
+    review: schemas.ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """post method to create new review
 
@@ -29,7 +33,7 @@ def create_review(
     Returns:
         schemas.Review
     """
-    return crud.create_review(db=db, review=review)
+    return crud.create_review(db=db, review=review, user=current_user)
 
 
 @router.get("/", response_model=List[schemas.Review], status_code=status.HTTP_200_OK)
@@ -71,7 +75,10 @@ def get_review_by_id(review_id: int, db: Session = Depends(get_db)) -> schemas.R
     "/{review_id}", response_model=schemas.Review, status_code=status.HTTP_202_ACCEPTED
 )
 def update_review(
-    review_id: int, updated_review: schemas.ReviewCreate, db: Session = Depends(get_db)
+    review_id: int,
+    updated_review: schemas.ReviewUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """put method to update review by its id
 
@@ -83,15 +90,21 @@ def update_review(
     Returns:
         schemas.Review
     """
-    return crud.update_review(db=db, review_id=review_id, updated_review=updated_review)
+    return crud.update_review(
+        db=db, review_id=review_id, updated_review=updated_review, user=current_user
+    )
 
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_review(review_id: int, db: Session = Depends(get_db)) -> None:
+def delete_review(
+    review_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
+) -> None:
     """delete method to delete review by its id
 
     Args:
         review_id (int)
         db (Session, optional): Defaults to Depends(get_db).
     """
-    return crud.delete_review(db=db, review_id=review_id)
+    return crud.delete_review(db=db, review_id=review_id, user=current_user)
