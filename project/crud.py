@@ -425,7 +425,7 @@ def get_review_by_id(db: Session, review_id: int) -> models.Review:
 
 
 def update_review(
-    db: Session, review_id: int, updated_review: schemas.ReviewCreate
+    db: Session, review_id: int, updated_review: schemas.ReviewUpdate, user: models.User
 ) -> models.Review:
     """updates instance of Review model from database by its id
 
@@ -435,7 +435,7 @@ def update_review(
         updated_review (schemas.ReviewCreate): Review schema with updated values
 
     Raises:
-        HTTPException: Handle no value
+        HTTPException: Handle no value or if access is granted
 
     Returns:
         returns updated instance of Review model
@@ -446,24 +446,39 @@ def update_review(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review with id {review_id} is not found",
         )
-    book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
-    if review.book_id != updated_review.book_id:
-        book.reviews.remove(review)
-        db.add(book)
+    if review.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    if updated_review.dict(exclude_unset=True).get("book_id"):
+        new_book = (
+            db.query(models.Book)
+            .filter(models.Book.id == updated_review.book_id)
+            .first()
+        )
+        if not new_book:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Book with id {review.book_id} is not found",
+            )
+        new_book.reviews.append(review)
+        db.add(new_book)
         db.commit()
-        db.refresh(book)
+        db.refresh(new_book)
+
+        old_book = (
+            db.query(models.Book).filter(models.Book.id == review.book_id).first()
+        )
+        if review.book_id != updated_review.book_id:
+            old_book.reviews.remove(review)
+            db.add(old_book)
+            db.commit()
+            db.refresh(old_book)
+
     for key, value in updated_review.dict(exclude_unset=True).items():
         setattr(review, key, value)
-    new_book = db.query(models.Book).filter(models.Book.id == review.book_id).first()
-    if not new_book:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with id {review.book_id} is not found",
-        )
-    new_book.reviews.append(review)
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
+
     db.add(review)
     db.commit()
     db.refresh(review)

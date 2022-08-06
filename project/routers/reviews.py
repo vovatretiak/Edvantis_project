@@ -75,7 +75,10 @@ def get_review_by_id(review_id: int, db: Session = Depends(get_db)) -> schemas.R
     "/{review_id}", response_model=schemas.Review, status_code=status.HTTP_202_ACCEPTED
 )
 def update_review(
-    review_id: int, updated_review: schemas.ReviewCreate, db: Session = Depends(get_db)
+    review_id: int,
+    updated_review: schemas.ReviewUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """put method to update review by its id
 
@@ -87,7 +90,9 @@ def update_review(
     Returns:
         schemas.Review
     """
-    return crud.update_review(db=db, review_id=review_id, updated_review=updated_review)
+    return crud.update_review(
+        db=db, review_id=review_id, updated_review=updated_review, user=current_user
+    )
 
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)

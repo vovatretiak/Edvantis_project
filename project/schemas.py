@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from enum import IntEnum
 from typing import List
+from typing import Optional
 from typing import Union
 
 from pydantic import BaseModel
@@ -61,10 +62,9 @@ class ReviewUpdate(ReviewBase):
     ReviewUpdate schema to update review with user_id, text, rating and book_id
     """
 
-    user_id: Union[int, None] = None
-    text: Union[str, None] = None
-    rating: Union[ReviewRating, None] = None
-    book_id: Union[int, None] = None
+    text: Union[None, str] = None
+    rating: Union[None, int] = None
+    book_id: Union[None, int] = None
 
 
 class Review(ReviewBase):
