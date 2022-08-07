@@ -109,6 +109,7 @@ class User(Base):
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    rank = Column(String, nullable=False, default="9 kyu")
 
     reviews = relationship("Review", back_populates="user", cascade="all, delete")
 

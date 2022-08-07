@@ -1,8 +1,6 @@
 from datetime import datetime
-from enum import Enum
 from enum import IntEnum
 from typing import List
-from typing import Optional
 from typing import Union
 
 from pydantic import BaseModel
@@ -82,6 +80,23 @@ class Review(ReviewBase):
         orm_mode = True
 
 
+class UserRank(StrEnum):
+    """
+    Enum class for user rank
+    """
+
+    KYU_9 = "9 kyu"
+    KYU_8 = "8 kyu"
+    KYU_7 = "7 kyu"
+    KYU_6 = "6 kyu"
+    KYU_5 = "5 kyu"
+    KYU_4 = "4 kyu"
+    KYU_3 = "3 kyu"
+    KYU_2 = "2 kyu"
+    KYU_1 = "1 kyu"
+    DAN_1 = "1 dan"
+
+
 class UserBase(BaseModel):
     """
     UserBase schema describes basic user by username, text, email and password
@@ -142,6 +157,7 @@ class User(UserBase):
     """
 
     id: int
+    rank: UserRank
     reviews: List[Review] = []
 
     class Config:

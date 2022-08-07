@@ -114,3 +114,34 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+def get_user_rank(reviews_number: int):
+    """_summary_
+
+    Args:
+        reviews_number (int)
+
+    Returns:
+       user rank
+    """
+    if reviews_number < 5:
+        return schemas.UserRank.KYU_9
+    elif reviews_number < 10:
+        return schemas.UserRank.KYU_8
+    elif reviews_number < 20:
+        return schemas.UserRank.KYU_7
+    elif reviews_number < 30:
+        return schemas.UserRank.KYU_6
+    elif reviews_number < 40:
+        return schemas.UserRank.KYU_5
+    elif reviews_number < 50:
+        return schemas.UserRank.KYU_4
+    elif reviews_number < 60:
+        return schemas.UserRank.KYU_3
+    elif reviews_number < 70:
+        return schemas.UserRank.KYU_2
+    elif reviews_number < 90:
+        return schemas.UserRank.KYU_1
+    elif reviews_number > 100:
+        return schemas.UserRank.DAN_1

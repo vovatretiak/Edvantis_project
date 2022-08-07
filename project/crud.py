@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 from . import models
 from . import schemas
 from project.utils import get_password_hash
+from project.utils import get_user_rank
 
 
 # crud for books
@@ -380,8 +381,13 @@ def create_review(
     )
     book.rating = float(rating[0])
     db.add(book)
+    user = db.query(models.User).filter(models.User.id == user.id).first()
+    rank = get_user_rank(len(user.reviews))
+    user.rank = rank
+    db.add(user)
     db.commit()
     db.refresh(book)
+    db.refresh(user)
     db.refresh(new_review)
 
     return new_review
@@ -462,6 +468,13 @@ def update_review(
                 detail=f"Book with id {review.book_id} is not found",
             )
         new_book.reviews.append(review)
+        rating = (
+            db.query(func.avg(models.Review.rating))
+            .filter(models.Review.book_id == updated_review.book_id)
+            .group_by(models.Review.book_id)
+            .first()
+        )
+        new_book.rating = float(rating[0])
         db.add(new_book)
         db.commit()
         db.refresh(new_book)
@@ -471,6 +484,13 @@ def update_review(
         )
         if review.book_id != updated_review.book_id:
             old_book.reviews.remove(review)
+            rating = (
+                db.query(func.avg(models.Review.rating))
+                .filter(models.Review.book_id == review.book_id)
+                .group_by(models.Review.book_id)
+                .first()
+            )
+            old_book.rating = float(rating[0])
             db.add(old_book)
             db.commit()
             db.refresh(old_book)
