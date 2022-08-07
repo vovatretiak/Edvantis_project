@@ -1,4 +1,3 @@
-from hashlib import sha1
 from typing import List
 
 from fastapi import APIRouter
@@ -7,9 +6,9 @@ from fastapi import Query
 from fastapi import status
 from sqlalchemy.orm import Session
 
-from project import crud
 from project import database
-from project import schemas
+from project.authors import crud
+from project.authors import schemas
 
 router = APIRouter(prefix="/authors", tags=["Authors"])
 
@@ -60,7 +59,7 @@ def get_author_by_id(author_id: int, db: Session = Depends(get_db)):
 
 
 @router.put(
-    "/{author_id}", response_model=schemas.Author, status_code=status.HTTP_200_OK
+    "/{author_id}", response_model=schemas.Author, status_code=status.HTTP_202_ACCEPTED
 )
 def update_author(
     author_id: int, updated_author: schemas.AuthorUpdate, db: Session = Depends(get_db)

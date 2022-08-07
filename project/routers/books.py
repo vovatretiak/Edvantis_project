@@ -7,9 +7,9 @@ from fastapi import Query
 from fastapi import status
 from sqlalchemy.orm import Session
 
-from project import crud
 from project import database
-from project import schemas
+from project.books import crud
+from project.books import schemas
 
 router = APIRouter(prefix="/books", tags=["Books"])
 

@@ -15,9 +15,10 @@ from jose import JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from . import database
-from . import models
-from . import schemas
+from project import database
+from project import schemas
+from project.users.models import User
+from project.users.schemas import UserRank
 
 
 load_dotenv(find_dotenv())
@@ -80,7 +81,7 @@ def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> 
 
 def get_current_user(
     db: Session = Depends(database.get_db), token: str = Depends(oauth2_scheme)
-) -> models.User:
+) -> User:
     """gets current user from database if credentials is valid
 
     Args:
@@ -91,7 +92,7 @@ def get_current_user(
         credentials_exception: Handle wrong credentials
 
     Returns:
-        models.User: returns current user
+        User: returns current user
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -106,18 +107,14 @@ def get_current_user(
         token_data = schemas.TokenData(username=username)
     except JWTError:
         return credentials_exception
-    user = (
-        db.query(models.User)
-        .filter(models.User.username == token_data.username)
-        .first()
-    )
+    user = db.query(User).filter(User.username == token_data.username).first()
     if user is None:
         raise credentials_exception
     return user
 
 
 def get_user_rank(reviews_number: int):
-    """_summary_
+    """gets user rank
 
     Args:
         reviews_number (int)
@@ -126,22 +123,22 @@ def get_user_rank(reviews_number: int):
        user rank
     """
     if reviews_number < 5:
-        return schemas.UserRank.KYU_9
+        return UserRank.KYU_9
     elif reviews_number < 10:
-        return schemas.UserRank.KYU_8
+        return UserRank.KYU_8
     elif reviews_number < 20:
-        return schemas.UserRank.KYU_7
+        return UserRank.KYU_7
     elif reviews_number < 30:
-        return schemas.UserRank.KYU_6
+        return UserRank.KYU_6
     elif reviews_number < 40:
-        return schemas.UserRank.KYU_5
+        return UserRank.KYU_5
     elif reviews_number < 50:
-        return schemas.UserRank.KYU_4
+        return UserRank.KYU_4
     elif reviews_number < 60:
-        return schemas.UserRank.KYU_3
+        return UserRank.KYU_3
     elif reviews_number < 70:
-        return schemas.UserRank.KYU_2
+        return UserRank.KYU_2
     elif reviews_number < 90:
-        return schemas.UserRank.KYU_1
+        return UserRank.KYU_1
     elif reviews_number > 100:
-        return schemas.UserRank.DAN_1
+        return UserRank.DAN_1

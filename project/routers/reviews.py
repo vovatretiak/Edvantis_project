@@ -6,11 +6,11 @@ from fastapi import Query
 from fastapi import status
 from sqlalchemy.orm import Session
 
-from project import crud
 from project import database
-from project import models
-from project import schemas
 from project import utils
+from project.reviews import crud
+from project.reviews import schemas
+from project.users.models import User
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
@@ -22,7 +22,7 @@ get_db = database.get_db
 def create_review(
     review: schemas.ReviewCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(utils.get_current_user),
+    current_user: User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """post method to create new review
 
@@ -78,7 +78,7 @@ def update_review(
     review_id: int,
     updated_review: schemas.ReviewUpdate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(utils.get_current_user),
+    current_user: User = Depends(utils.get_current_user),
 ) -> schemas.Review:
     """put method to update review by its id
 
@@ -99,7 +99,7 @@ def update_review(
 def delete_review(
     review_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(utils.get_current_user),
+    current_user: User = Depends(utils.get_current_user),
 ) -> None:
     """delete method to delete review by its id
 

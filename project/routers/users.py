@@ -8,11 +8,12 @@ from fastapi import status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from project import crud
 from project import database
-from project import models
-from project import schemas
 from project import utils
+from project.schemas import Token
+from project.users import crud
+from project.users import models
+from project.users import schemas
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -39,12 +40,10 @@ def create_user(
     return crud.create_user(user=user, db=db)
 
 
-@router.post(
-    "/login", response_model=schemas.Token, status_code=status.HTTP_201_CREATED
-)
+@router.post("/login", response_model=Token, status_code=status.HTTP_201_CREATED)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-) -> schemas.Token:
+) -> Token:
     """post method to create token for user
 
     Args:
@@ -56,7 +55,7 @@ def login(
         HTTPException: Handle wrong password
 
     Returns:
-        schemas.Token
+        Token
     """
     user = crud.get_user_by_username(db=db, username=form_data.username)
     hashed_pw = user.password
@@ -65,7 +64,7 @@ def login(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
         )
     access_token = utils.create_access_token(subject=form_data.username)
-    return schemas.Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @router.get("/", response_model=List[schemas.User], status_code=status.HTTP_200_OK)
