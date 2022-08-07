@@ -534,6 +534,13 @@ def delete_review(db: Session, review_id: int, user: models.User) -> None:
             detail=f"Book with id {review.first().book_id} is not found",
         )
     book.reviews.remove(review.first())
+    rating = (
+        db.query(func.avg(models.Review.rating))
+        .filter(models.Review.book_id == review.first().book_id)
+        .group_by(models.Review.book_id)
+        .first()
+    )
+    book.rating = float(rating[0])
     db.add(book)
     db.commit()
     db.refresh(book)
