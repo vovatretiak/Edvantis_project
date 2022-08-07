@@ -26,10 +26,9 @@ Base = declarative_base()
 
 
 def get_db():
+    """database generator"""
     db = SessionLocal()
     try:
         yield db
-    except Exception:
-        db.rollback()
     finally:
         db.close()

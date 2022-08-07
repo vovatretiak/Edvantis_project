@@ -24,7 +24,6 @@ class ReviewBase(BaseModel):
 
     text: Union[str, None]
     rating: ReviewRating
-    book_id: int
 
 
 class ReviewCreate(ReviewBase):
@@ -32,6 +31,8 @@ class ReviewCreate(ReviewBase):
     ReviewCreate schema to create review with user_id, text, rating and book_id
     validation may be added in the future
     """
+
+    book_id: int
 
 
 class ReviewUpdate(ReviewBase):
@@ -41,7 +42,6 @@ class ReviewUpdate(ReviewBase):
 
     text: Union[None, str] = None
     rating: Union[None, int] = None
-    book_id: Union[None, int] = None
 
 
 class Review(ReviewBase):

@@ -124,45 +124,23 @@ def update_review(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
-    if updated_review.dict(exclude_unset=True).get("book_id"):
-        new_book = db.query(Book).filter(Book.id == updated_review.book_id).first()
-        if not new_book:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {review.book_id} is not found",
-            )
-        new_book.reviews.append(review)
-        rating = (
-            db.query(func.avg(models.Review.rating))
-            .filter(models.Review.book_id == updated_review.book_id)
-            .group_by(models.Review.book_id)
-            .first()
-        )
-        new_book.rating = float(rating[0])
-        db.add(new_book)
-        db.commit()
-        db.refresh(new_book)
-
-        old_book = db.query(Book).filter(Book.id == review.book_id).first()
-        if review.book_id != updated_review.book_id:
-            old_book.reviews.remove(review)
-            rating = (
-                db.query(func.avg(models.Review.rating))
-                .filter(models.Review.book_id == review.book_id)
-                .group_by(models.Review.book_id)
-                .first()
-            )
-            old_book.rating = float(rating[0])
-            db.add(old_book)
-            db.commit()
-            db.refresh(old_book)
 
     for key, value in updated_review.dict(exclude_unset=True).items():
         setattr(review, key, value)
-
     db.add(review)
     db.commit()
     db.refresh(review)
+    book = db.query(Book).filter(Book.id == review.book_id).first()
+    rating = (
+        db.query(func.avg(models.Review.rating))
+        .filter(models.Review.book_id == review.book_id)
+        .group_by(models.Review.book_id)
+        .first()
+    )
+    book.rating = float(rating[0])
+    db.add(book)
+    db.commit()
+    db.refresh(book)
     return review
 
 
@@ -188,21 +166,22 @@ def delete_review(db: Session, review_id: int, user: User) -> None:
             detail="Access denied",
         )
     book = db.query(Book).filter(Book.id == review.first().book_id).first()
-    if not book:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with id {review.first().book_id} is not found",
-        )
     book.reviews.remove(review.first())
-    rating = (
-        db.query(func.avg(models.Review.rating))
-        .filter(models.Review.book_id == review.first().book_id)
-        .group_by(models.Review.book_id)
-        .first()
-    )
-    book.rating = float(rating[0])
-    db.add(book)
-    db.commit()
-    db.refresh(book)
     review.delete()
     db.commit()
+    if len(book.reviews) >= 1:
+        rating = (
+            db.query(func.avg(models.Review.rating))
+            .filter(models.Review.book_id == review.first().book_id)
+            .group_by(models.Review.book_id)
+            .first()
+        )
+        book.rating = float(rating[0])
+        db.add(book)
+        db.commit()
+        db.refresh(book)
+    if len(book.reviews) == 0:
+        book.rating = 0
+        db.add(book)
+        db.commit()
+        db.refresh(book)
