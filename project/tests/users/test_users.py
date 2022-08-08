@@ -19,3 +19,20 @@ def test_all_users():
     assert verify_password("password2", data[1]["password"])
     assert data[0]["rank"] == "9 kyu"
     assert data[1]["rank"] == "9 kyu"
+
+
+def test_registration():
+    """test method to create new user"""
+    data = {
+        "username": "testuser",
+        "email": "test@email.com",
+        "password": "1234567890",
+        "confirm_password": "1234567890",
+    }
+    response = client.post("/users/registration", json=data)
+    assert response.status_code == 201
+    response_data = response.json()
+    assert "id" in response_data
+    assert verify_password(data["password"], response_data["password"])
+    assert response_data["rank"] == "9 kyu"
+    assert "reviews" in response_data
