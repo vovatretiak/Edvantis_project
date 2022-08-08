@@ -1,21 +1,17 @@
 import os
 
-from dotenv import find_dotenv
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from main import app
 from project.database import Base
+from project.database import DB_HOST
+from project.database import DB_PASS
+from project.database import DB_PORT
+from project.database import DB_USER
 from project.database import get_db
 
 
-load_dotenv(find_dotenv())
-
-DB_USER = "postgres"
-DB_PASS = os.environ.get("pass")
-DB_HOST = "localhost"
-DB_PORT = "5432"
 DB_NAME = "edvantis_project_test"
 
 SQLALCHEMY_DATABASE_URL = (
