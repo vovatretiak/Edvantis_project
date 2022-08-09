@@ -5,7 +5,7 @@ from project.utils import get_password_hash
 
 
 @pytest.fixture(autouse=True)
-def create_dummy_users(tmpdir):
+def create_dummy_users():
     """fixture to execute asserts before and after a test is run"""
 
     from .db_for_tests import override_get_db

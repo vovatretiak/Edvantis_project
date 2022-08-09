@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
+from ..db_for_tests import override_get_db
 from main import app
+from project.utils import create_access_token
 from project.utils import verify_password
 
 
@@ -46,3 +48,26 @@ def test_login():
     response_data = response.json()
     assert "access_token" in response_data
     assert response_data["token_type"] == "bearer"
+    # wrong password
+    data = {"username": "john123", "password": "password_wrong"}
+    response = client.post("/users/login", data=data)
+    assert response.status_code == 403
+
+
+def test_read_me():
+    """test get method to show current user"""
+    user_access_token = create_access_token("john123")
+    response = client.get(
+        "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "john123"
+    assert "id" in data
+    assert "reviews" in data
+    # wrong token
+    user_access_token = create_access_token("john123_wrong")
+    response = client.get(
+        "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
+    )
+    assert response.status_code == 401

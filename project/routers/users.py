@@ -61,7 +61,7 @@ def login(
     hashed_pw = user.password
     if not utils.verify_password(form_data.password, hashed_pw):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password"
         )
     access_token = utils.create_access_token(subject=form_data.username)
     return Token(access_token=access_token, token_type="bearer")
