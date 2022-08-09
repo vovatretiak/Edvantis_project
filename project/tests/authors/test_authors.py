@@ -43,3 +43,18 @@ def test_get_all_authors():
     assert author not in authors
     assert authors[0]["id"] == 2
     assert len(authors) == 2
+
+
+def test_get_author_by_id():
+    """tests get method to show author by its id"""
+    author_id = 1
+    response = client.get(f"/authors/{author_id}")
+    assert response.status_code == 200
+    author = response.json()
+    assert author["id"] == 1
+    assert author["first_name"] == "Averell"
+    # author_id is not exist
+    author_id = 4
+    response = client.get(f"/authors/{author_id}")
+    assert response.status_code == 404
+    assert response.json()["detail"] == f"Author with id {author_id} is not found"
