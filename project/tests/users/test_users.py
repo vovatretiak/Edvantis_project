@@ -1,6 +1,5 @@
 from fastapi.testclient import TestClient
 
-from ..db_for_tests import override_get_db
 from main import app
 from project.utils import create_access_token
 from project.utils import verify_password
@@ -21,13 +20,18 @@ def test_all_users():
     assert verify_password("password2", data[1]["password"])
     assert data[0]["rank"] == "9 kyu"
     assert data[1]["rank"] == "9 kyu"
+    response = client.get("/users/", params={"offset": 1, "limit": 1})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["username"] == "jane123"
 
 
 def test_registration():
     """tests post method to create new user"""
     data = {
         "username": "testuser",
-        "email": "test@email.com",
+        "email": "test@mail.com",
         "password": "1234567890",
         "confirm_password": "1234567890",
     }
@@ -38,6 +42,17 @@ def test_registration():
     assert verify_password(data["password"], response_data["password"])
     assert response_data["rank"] == "9 kyu"
     assert "reviews" in response_data
+    # invalid username
+    data["username"] = "testuser!"
+    response = client.post("/users/registration", json=data)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "must be alphanumeric"
+    # passwords do not match
+    data["username"] = "testuser"
+    data["confirm_password"] = "1"
+    response = client.post("/users/registration", json=data)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "passwords do not match"
 
 
 def test_login():
@@ -55,7 +70,7 @@ def test_login():
 
 
 def test_read_me():
-    """test get method to show current user"""
+    """tests get method to show current user"""
     user_access_token = create_access_token("john123")
     response = client.get(
         "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
@@ -71,3 +86,55 @@ def test_read_me():
         "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
     )
     assert response.status_code == 401
+
+
+def test_update_me():
+    """tests put method to update current user"""
+    data = {
+        "username": "updated_jonh",
+        "email": "updated_jonh@mail.com",
+        "password": "newpass",
+        "confirm_password": "newpass",
+    }
+    user_access_token = create_access_token("john123")
+    response = client.put(
+        "/users/profile",
+        headers={"Authorization": f"Bearer {user_access_token}"},
+        json=data,
+    )
+    # invalid username
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "must be alphanumeric"
+    # passwords do not match
+    data["username"] = "updatedjonh"
+    data["confirm_password"] = "1"
+    response = client.put(
+        "/users/profile",
+        headers={"Authorization": f"Bearer {user_access_token}"},
+        json=data,
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "passwords do not match"
+    # correct values
+    data["confirm_password"] = "newpass"
+    response = client.put(
+        "/users/profile",
+        headers={"Authorization": f"Bearer {user_access_token}"},
+        json=data,
+    )
+    assert response.status_code == 202
+    response_data = response.json()
+    assert "id" in response_data
+    assert response_data["username"] == "updatedjonh"
+    assert response_data["email"] == "updated_jonh@mail.com"
+    assert verify_password(data["password"], response_data["password"])
+
+
+def test_delete_me():
+    """tests delete method to delete current user"""
+    user_access_token = create_access_token("john123")
+
+    response = client.delete(
+        "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
+    )
+    assert response.status_code == 204
