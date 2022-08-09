@@ -58,3 +58,20 @@ def test_get_author_by_id():
     response = client.get(f"/authors/{author_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Author with id {author_id} is not found"
+
+
+def test_update_author():
+    """tests put method to show author by its id"""
+    author_id = 1
+    payload = {"first_name": "John", "last_name": "Doe"}
+    response = client.put(f"/authors/{author_id}", json=payload)
+    assert response.status_code == 202
+    updated_author = response.json()
+    assert updated_author["id"] == 1
+    assert updated_author["first_name"] == "John"
+    assert updated_author["last_name"] == "Doe"
+    assert updated_author["middle_name"] == "Astrid"
+    # author_id is not exist
+    author_id = 4
+    response = client.put(f"/authors/{author_id}", json=payload)
+    assert response.status_code == 404
