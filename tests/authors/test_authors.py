@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from ..db_for_tests import override_get_db
 from main import app
 
 client = TestClient(app)
@@ -80,6 +81,7 @@ def test_update_author():
 
 def test_delete_author():
     """tests delete method to delete author by its id"""
+    db = next(override_get_db())
     author_id = 1
     response = client.delete(f"/authors/{author_id}")
     assert response.status_code == 204

@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from project import database
 from project import schemas
-from project.users.models import User
+from project.models import User
 from project.users.schemas import UserRank
 
 

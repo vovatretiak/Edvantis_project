@@ -5,10 +5,10 @@ from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from project.authors.models import Author
-from project.books import models
+from project import models
 from project.books import schemas
-from project.reviews.models import Review
+from project.models import Author
+from project.models import Review
 
 
 def get_book_by_id(db: Session, book_id: int) -> models.Book:
