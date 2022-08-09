@@ -12,66 +12,67 @@ def test_all_users():
     """tests get method to get all users"""
     response = client.get("/users/")
     assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 2
-    assert data[0]["username"] == "john123"
-    assert data[1]["username"] == "jane123"
-    assert verify_password("password", data[0]["password"])
-    assert verify_password("password2", data[1]["password"])
-    assert data[0]["rank"] == "9 kyu"
-    assert data[1]["rank"] == "9 kyu"
+    users = response.json()
+    assert len(users) == 2
+    assert users[0]["username"] == "john123"
+    assert users[1]["username"] == "jane123"
+    assert verify_password("password", users[0]["password"])
+    assert verify_password("password2", users[1]["password"])
+    assert users[0]["rank"] == "9 kyu"
+    assert users[1]["rank"] == "9 kyu"
+    # with params
     response = client.get("/users/", params={"offset": 1, "limit": 1})
     assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["username"] == "jane123"
+    users = response.json()
+    assert len(users) == 1
+    assert users[0]["username"] == "jane123"
 
 
 def test_registration():
     """tests post method to create new user"""
-    data = {
+    payload = {
         "username": "testuser",
         "email": "test@mail.com",
         "password": "1234567890",
         "confirm_password": "1234567890",
     }
-    response = client.post("/users/registration", json=data)
+    response = client.post("/users/registration", json=payload)
     assert response.status_code == 201
-    response_data = response.json()
-    assert "id" in response_data
-    assert verify_password(data["password"], response_data["password"])
-    assert response_data["rank"] == "9 kyu"
-    assert "reviews" in response_data
+    new_user = response.json()
+    assert "id" in new_user
+    assert verify_password(payload["password"], new_user["password"])
+    assert new_user["rank"] == "9 kyu"
+    assert "reviews" in new_user
 
     response = client.get("/users/")
     assert response.status_code == 200
-    get_data = response.json()
-    assert len(get_data) == 3
+    users = response.json()
+    assert len(users) == 3
 
     # invalid username
-    data["username"] = "testuser!"
-    response = client.post("/users/registration", json=data)
+    payload["username"] = "testuser!"
+    response = client.post("/users/registration", json=payload)
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "must be alphanumeric"
     # passwords do not match
-    data["username"] = "testuser"
-    data["confirm_password"] = "1"
-    response = client.post("/users/registration", json=data)
+    payload["username"] = "testuser"
+    payload["confirm_password"] = "1"
+    response = client.post("/users/registration", json=payload)
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "passwords do not match"
 
 
 def test_login():
     """tests post method to create token for user"""
-    data = {"username": "john123", "password": "password"}
-    response = client.post("/users/login", data=data)
+    payload = {"username": "john123", "password": "password"}
+    response = client.post("/users/login", data=payload)
     assert response.status_code == 201
-    response_data = response.json()
-    assert "access_token" in response_data
-    assert response_data["token_type"] == "bearer"
+    token_data = response.json()
+    assert "access_token" in token_data
+    assert token_data["token_type"] == "bearer"
     # wrong password
-    data = {"username": "john123", "password": "password_wrong"}
-    response = client.post("/users/login", data=data)
+    payload = {"username": "john123", "password": "password_wrong"}
+    response = client.post("/users/login", data=payload)
     assert response.status_code == 403
 
 
@@ -82,10 +83,10 @@ def test_read_me():
         "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}
     )
     assert response.status_code == 200
-    data = response.json()
-    assert data["username"] == "john123"
-    assert "id" in data
-    assert "reviews" in data
+    user = response.json()
+    assert user["username"] == "john123"
+    assert "id" in user
+    assert "reviews" in user
     # wrong token
     user_access_token = create_access_token("john123_wrong")
     response = client.get(
@@ -96,7 +97,7 @@ def test_read_me():
 
 def test_update_me():
     """tests put method to update current user"""
-    data = {
+    payload = {
         "username": "updated_jonh",
         "email": "updated_jonh@mail.com",
         "password": "newpass",
@@ -106,34 +107,34 @@ def test_update_me():
     response = client.put(
         "/users/profile",
         headers={"Authorization": f"Bearer {user_access_token}"},
-        json=data,
+        json=payload,
     )
     # invalid username
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "must be alphanumeric"
     # passwords do not match
-    data["username"] = "updatedjonh"
-    data["confirm_password"] = "1"
+    payload["username"] = "updatedjonh"
+    payload["confirm_password"] = "1"
     response = client.put(
         "/users/profile",
         headers={"Authorization": f"Bearer {user_access_token}"},
-        json=data,
+        json=payload,
     )
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "passwords do not match"
     # correct values
-    data["confirm_password"] = "newpass"
+    payload["confirm_password"] = "newpass"
     response = client.put(
         "/users/profile",
         headers={"Authorization": f"Bearer {user_access_token}"},
-        json=data,
+        json=payload,
     )
     assert response.status_code == 202
-    response_data = response.json()
-    assert "id" in response_data
-    assert response_data["username"] == "updatedjonh"
-    assert response_data["email"] == "updated_jonh@mail.com"
-    assert verify_password(data["password"], response_data["password"])
+    updated_user = response.json()
+    assert "id" in updated_user
+    assert updated_user["username"] == "updatedjonh"
+    assert updated_user["email"] == "updated_jonh@mail.com"
+    assert verify_password(payload["password"], updated_user["password"])
 
 
 def test_delete_me():
