@@ -42,6 +42,12 @@ def test_registration():
     assert verify_password(data["password"], response_data["password"])
     assert response_data["rank"] == "9 kyu"
     assert "reviews" in response_data
+
+    response = client.get("/users/")
+    assert response.status_code == 200
+    get_data = response.json()
+    assert len(get_data) == 3
+
     # invalid username
     data["username"] = "testuser!"
     response = client.post("/users/registration", json=data)
