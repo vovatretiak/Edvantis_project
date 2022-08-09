@@ -109,7 +109,7 @@ def delete_author(db: Session, author_id: int) -> None:
         HTTPException: Handles no value
     """
     author = db.query(models.Author).filter(models.Author.id == author_id)
-    if not author:
+    if not author.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Author with id {author_id} is not found",

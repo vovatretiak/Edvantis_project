@@ -75,3 +75,16 @@ def test_update_author():
     author_id = 4
     response = client.put(f"/authors/{author_id}", json=payload)
     assert response.status_code == 404
+    assert response.json()["detail"] == f"Author with id {author_id} is not found"
+
+
+def test_delete_author():
+    """tests delete method to delete author by its id"""
+    author_id = 1
+    response = client.delete(f"/authors/{author_id}")
+    assert response.status_code == 204
+    # author_id is not exist
+    author_id = 4
+    response = client.delete(f"/authors/{author_id}")
+    assert response.status_code == 404
+    assert response.json()["detail"] == f"Author with id {author_id} is not found"
