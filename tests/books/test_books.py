@@ -7,8 +7,10 @@ from ..db_for_tests import override_get_db
 from main import app
 from project.models import Author
 from project.models import Book
-from project.models import Review
 from project.models import User
+from project.reviews.crud import create_review
+from project.reviews.schemas import ReviewCreate
+from project.reviews.schemas import ReviewRating
 from project.utils import get_password_hash
 
 
@@ -67,19 +69,47 @@ def create_dummy_books():
         db.add(new_book)
         db.commit()
 
-    reviews = [
-        Review(user_id=1, text="wow", rating=5, book_id=1),
-        Review(user_id=2, text="bad", rating=1, book_id=1),  # rating 3 for book 1
-        Review(user_id=1, text="good", rating=3, book_id=2),
-        Review(user_id=2, text="wow", rating=5, book_id=2),  # rating 4 for book 2
-        Review(user_id=1, text="not good", rating=2, book_id=3),
-        Review(user_id=2, text="not good", rating=2, book_id=3),  # rating 2 for book 3
-        Review(user_id=1, text="wow", rating=5, book_id=4),
-        Review(user_id=2, text="wow", rating=5, book_id=4),  # rating 5 for book 1
-    ]
-    for review in reviews:
-        db.add(review)
-        db.commit()
+    create_review(
+        db,
+        user=new_user,
+        review=ReviewCreate(text="wow", rating=ReviewRating.FIVE, book_id=1),
+    )
+    create_review(
+        db,
+        user=new_user2,
+        review=ReviewCreate(text="bad", rating=ReviewRating.ONE, book_id=1),
+    )
+    create_review(
+        db,
+        user=new_user,
+        review=ReviewCreate(text="good", rating=ReviewRating.THREE, book_id=2),
+    )
+    create_review(
+        db,
+        user=new_user2,
+        review=ReviewCreate(text="wow", rating=ReviewRating.FIVE, book_id=2),
+    )
+    create_review(
+        db,
+        user=new_user,
+        review=ReviewCreate(text="not good", rating=ReviewRating.TWO, book_id=3),
+    )
+    create_review(
+        db,
+        user=new_user2,
+        review=ReviewCreate(text="not good", rating=ReviewRating.TWO, book_id=3),
+    )
+    create_review(
+        db,
+        user=new_user,
+        review=ReviewCreate(text="wow", rating=ReviewRating.FIVE, book_id=4),
+    )
+    create_review(
+        db,
+        user=new_user2,
+        review=ReviewCreate(text="wow", rating=ReviewRating.FIVE, book_id=4),
+    )
+
     yield
 
     # teardown
@@ -96,9 +126,9 @@ class TestBook:
 
     def test_create_book(self):
         """tests post method to create new book"""
+
         response = client.get("/authors/2")
         author = response.json()
-        assert author["first_name"] == "Skipp"
 
         payload = {
             "title": "new book",
@@ -122,3 +152,29 @@ class TestBook:
         assert response.status_code == 200
         books = response.json()
         assert book in books
+
+    def test_get_all_books(self):
+        """tests get method to show all books"""
+        response = client.get("/books/")
+        assert response.status_code == 200, response.text
+        books = response.json()
+        assert len(books) == 10
+        assert books[0]["title"] == "Thalasseus maximus"
+        assert books[0]["rating"] == 3
+        assert books[0]["year"] == 2007
+        assert books[0]["genre"] == "Thriller"
+        assert books[2]["type"] == "Electronic"
+        assert books[6]["pages"] == 52
+        first_book = books[0]
+        # with params
+        response = client.get("/books/", params={"offset": 6, "limit": 2})
+        assert response.status_code == 200, response.text
+        books = response.json()
+        assert first_book not in books
+        assert len(books) == 2
+        assert books[0]["id"] == 7
+        assert books[1]["id"] == 8
+
+    def test_books_with_rating(self):
+        """test get method to show books with specific rating"""
+        pass

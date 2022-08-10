@@ -8,7 +8,7 @@ from ..db_for_tests import override_get_db
 from project.models import Author
 
 
-@pytest.fixture(autouse=True, scope="class")
+@pytest.fixture(autouse=True, scope="package")
 def create_dummy_authors():
     """fixture to execute asserts before and after a test is run"""
 

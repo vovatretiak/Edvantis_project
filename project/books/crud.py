@@ -98,7 +98,9 @@ def get_books(db: Session, offset: int, limit: int) -> List[models.Book]:
     Returns:
         List[models.Book]: returns list of instances of Book model
     """
-    return db.query(models.Book).offset(offset).limit(limit).all()
+    return (
+        db.query(models.Book).order_by(models.Book.id).offset(offset).limit(limit).all()
+    )
 
 
 def get_books_by_rating(
