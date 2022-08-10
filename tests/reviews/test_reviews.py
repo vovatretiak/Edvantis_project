@@ -32,3 +32,36 @@ class TestReview:
         assert reviews[0]["rating"] == 2
         assert reviews[0]["text"] == "not good"
         assert reviews[2]["id"] == 7
+
+    def test_create_review(self):
+        """tests post method to create new review"""
+        user_access_token = create_access_token("john123")
+        payload = {"text": "new review", "rating": ReviewRating.FIVE, "book_id": 5}
+        response = client.post(
+            "/reviews/",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+            json=payload,
+        )
+        assert response.status_code == 201
+        review = response.json()
+        assert "created_at" in review
+        assert review["user_id"] == 1
+        assert review["text"] == payload["text"]
+        assert review["book_id"] == payload["book_id"]
+
+        response = client.get("/reviews/")
+        assert response.status_code == 200
+        reviews = response.json()
+        assert len(reviews) == 9
+        # bad token
+        user_access_token = create_access_token("john1234")
+        response = client.post(
+            "/reviews/",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+            json=payload,
+        )
+        assert response.status_code == 401
+
+    def test_review_get_by_id(self):
+        """tests get method to show review by its id"""
+        pass
