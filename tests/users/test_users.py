@@ -173,7 +173,7 @@ def test_update_me():
 
 def test_delete_me():
     """tests delete method to delete current user"""
-    user_access_token = create_access_token("john123")
+    user_access_token = create_access_token("updatedjonh")
 
     response = client.delete(
         "/users/profile", headers={"Authorization": f"Bearer {user_access_token}"}

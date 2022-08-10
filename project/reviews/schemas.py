@@ -51,6 +51,7 @@ class Review(ReviewBase):
 
     id: int
     user_id: int
+    book_id: int
     created_at: datetime
 
     class Config:

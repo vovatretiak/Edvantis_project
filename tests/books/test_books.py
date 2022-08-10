@@ -127,7 +127,7 @@ def create_dummy_books():
     db.commit()
 
 
-# @pytest.mark.usefixtures("create_dummy_books")
+@pytest.mark.usefixtures("create_dummy_books")
 class TestBook:
     """tests book methods"""
 
