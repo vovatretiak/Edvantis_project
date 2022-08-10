@@ -84,6 +84,11 @@ def get_books_by_author_id(db: Session, author_id: int) -> List[models.Book]:
         List[models.Book]: returns list of instances of Book model
     """
     author = db.query(Author).filter(Author.id == author_id).first()
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author with id {author_id} is not found",
+        )
     return author.books
 
 

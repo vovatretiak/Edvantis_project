@@ -7,12 +7,13 @@ client = TestClient(app)
 from ..db_for_tests import override_get_db
 from project.models import Author
 
+db = next(override_get_db())
+
 
 @pytest.fixture(autouse=True, scope="package")
 def create_dummy_authors():
     """fixture to execute asserts before and after a test is run"""
 
-    db = next(override_get_db())
     author = Author(
         first_name="Averell",
         last_name="Povah",
@@ -56,14 +57,16 @@ class TestAuthor:
         assert response.status_code == 200
         response_data = response.json()
         assert len(response_data) == 4
-        # assert author in response_data
+        assert author in response_data
+        db.query(Author).filter(Author.id == author["id"]).delete()
+        db.commit()
 
     def test_get_all_authors(self):
         """tests get method to show all authors"""
         response = client.get("/authors/")
         assert response.status_code == 200
         authors = response.json()
-        assert len(authors) == 4
+        assert len(authors) == 3
         assert authors[0]["first_name"] == "Averell"
         assert "id" in authors[0]
         assert "image_file" in authors[0]
