@@ -133,176 +133,169 @@ class TestBook:
 
     def test_create_book(self):
         """tests post method to create new book"""
-        with TestClient(app) as client:
-            response = client.get("/authors/2")
-            author = response.json()
+        response = client.get("/authors/2")
+        author = response.json()
 
-            payload = {
-                "title": "new book",
-                "description": "text about book",
-                "year": 2000,
-                "pages": 200,
-                "genre": "Horror",
-                "type": "Paper",
-                "author_id": [2],
-            }
-            response = client.post("/books/", json=payload)
-            assert response.status_code == 201, response.text
-            book = response.json()
-            assert "id" in book
-            assert "reviews" in book
-            assert book["rating"] == 0
-            assert len(book["authors"]) == 1
-            assert author in book["authors"]
+        payload = {
+            "title": "new book",
+            "description": "text about book",
+            "year": 2000,
+            "pages": 200,
+            "genre": "Horror",
+            "type": "Paper",
+            "author_id": [2],
+        }
+        response = client.post("/books/", json=payload)
+        assert response.status_code == 201, response.text
+        book = response.json()
+        assert "id" in book
+        assert "reviews" in book
+        assert book["rating"] == 0
+        assert len(book["authors"]) == 1
+        assert author in book["authors"]
 
-            response = client.get("/books/", params={"offset": 2})
-            assert response.status_code == 200
-            books = response.json()
-            assert book in books
-            db.query(Book).filter(Book.id == book["id"]).delete()
-            db.commit()
+        response = client.get("/books/", params={"offset": 2})
+        assert response.status_code == 200
+        books = response.json()
+        assert book in books
+        db.query(Book).filter(Book.id == book["id"]).delete()
+        db.commit()
 
     def test_get_all_books(self):
         """tests get method to show all books"""
-        with TestClient(app) as client:
-            response = client.get("/books/")
-            assert response.status_code == 200, response.text
-            books = response.json()
-            assert len(books) == 10
-            assert books[0]["title"] == "Thalasseus maximus"
-            assert books[0]["rating"] == 2.5
-            assert books[0]["year"] == 2007
-            assert books[0]["genre"] == "Thriller"
-            assert books[2]["type"] == "Electronic"
-            assert books[6]["pages"] == 52
-            first_book = books[0]
-            # with params
-            response = client.get("/books/", params={"offset": 6, "limit": 2})
-            assert response.status_code == 200, response.text
-            books = response.json()
-            assert first_book not in books
-            assert len(books) == 2
-            assert books[0]["id"] == 7
-            assert books[1]["id"] == 8
+        response = client.get("/books/")
+        assert response.status_code == 200, response.text
+        books = response.json()
+        assert len(books) == 10
+        assert books[0]["title"] == "Thalasseus maximus"
+        assert books[0]["rating"] == 2.5
+        assert books[0]["year"] == 2007
+        assert books[0]["genre"] == "Thriller"
+        assert books[2]["type"] == "Electronic"
+        assert books[6]["pages"] == 52
+        first_book = books[0]
+        # with params
+        response = client.get("/books/", params={"offset": 6, "limit": 2})
+        assert response.status_code == 200, response.text
+        books = response.json()
+        assert first_book not in books
+        assert len(books) == 2
+        assert books[0]["id"] == 7
+        assert books[1]["id"] == 8
 
     def test_books_with_rating(self):
         """tests get method to show books with specific rating"""
-        with TestClient(app) as client:
-            # from 2 and bigger
-            rating = 2
-            response = client.get(f"/books/rating/{rating}")
-            books = response.json()
-            assert books[0]["rating"] == 2
-            assert books[0]["title"] == "Plegadis falcinellus"
-            assert books[1]["rating"] == 2.5
-            assert books[1]["title"] == "Thalasseus maximus"
-            # from 3 and bigger
-            rating = 3
-            response = client.get(f"/books/rating/{rating}")
-            books = response.json()
-            assert books[0]["rating"] == 4
-            assert books[0]["title"] == "unavailable"
-            assert books[1]["rating"] == 5
-            assert books[1]["title"] == "Paroaria gularis"
-            # from 4 and bigger
-            rating = 4
-            response = client.get(f"/books/rating/{rating}")
-            books = response.json()
-            assert books[0]["rating"] == 4
-            assert books[0]["title"] == "unavailable"
-            assert books[1]["rating"] == 5
-            assert books[1]["title"] == "Paroaria gularis"
-            # equal 5
-            rating = 5
-            response = client.get(f"/books/rating/{rating}")
-            books = response.json()
-            assert len(books) == 1
-            assert books[0]["rating"] == 5
-            assert books[0]["title"] == "Paroaria gularis"
+        # from 2 and bigger
+        rating = 2
+        response = client.get(f"/books/rating/{rating}")
+        books = response.json()
+        assert books[0]["rating"] == 2
+        assert books[0]["title"] == "Plegadis falcinellus"
+        assert books[1]["rating"] == 2.5
+        assert books[1]["title"] == "Thalasseus maximus"
+        # from 3 and bigger
+        rating = 3
+        response = client.get(f"/books/rating/{rating}")
+        books = response.json()
+        assert books[0]["rating"] == 4
+        assert books[0]["title"] == "unavailable"
+        assert books[1]["rating"] == 5
+        assert books[1]["title"] == "Paroaria gularis"
+        # from 4 and bigger
+        rating = 4
+        response = client.get(f"/books/rating/{rating}")
+        books = response.json()
+        assert books[0]["rating"] == 4
+        assert books[0]["title"] == "unavailable"
+        assert books[1]["rating"] == 5
+        assert books[1]["title"] == "Paroaria gularis"
+        # equal 5
+        rating = 5
+        response = client.get(f"/books/rating/{rating}")
+        books = response.json()
+        assert len(books) == 1
+        assert books[0]["rating"] == 5
+        assert books[0]["title"] == "Paroaria gularis"
 
     def test_get_book_by_id(self):
         """tests get method to show book by its id"""
-        with TestClient(app) as client:
-            book_id = 1
-            response = client.get(f"/books/{book_id}")
-            assert response.status_code == 200
-            book = response.json()
-            assert book["title"] == "Thalasseus maximus"
-            # id not exist
-            book_id = 12
-            response = client.get(f"/books/{book_id}")
-            assert response.status_code == 404
-            assert response.json()["detail"] == f"Book with id {book_id} is not found"
+        book_id = 1
+        response = client.get(f"/books/{book_id}")
+        assert response.status_code == 200
+        book = response.json()
+        assert book["title"] == "Thalasseus maximus"
+        # id not exist
+        book_id = 12
+        response = client.get(f"/books/{book_id}")
+        assert response.status_code == 404
+        assert response.json()["detail"] == f"Book with id {book_id} is not found"
 
     def test_get_recommendation(self):
         """tests get method to show book with specific genre
         with rating more than average rating in this genre"""
-        with TestClient(app) as client:
-            # thriller book with rating 0
-            book_id = 8
-            response = client.get(f"/books/{book_id}")
-            assert response.status_code == 200
-            book = response.json()
-            assert book["genre"] == "Thriller"
+        # thriller book with rating 0
+        book_id = 8
+        response = client.get(f"/books/{book_id}")
+        assert response.status_code == 200
+        book = response.json()
+        assert book["genre"] == "Thriller"
 
-            genre = BookGenre.THRILLER
-            response = client.get(f"/books/recommendations/{genre}")
-            assert response.status_code == 200
-            books = response.json()
-            assert book not in books
-            assert len(books) == 2
-            assert books[0]["title"] == "unavailable"
-            assert books[0]["rating"] == 4
-            assert books[1]["title"] == "Thalasseus maximus"
-            assert books[1]["rating"] == 2.5
+        genre = BookGenre.THRILLER
+        response = client.get(f"/books/recommendations/{genre}")
+        assert response.status_code == 200
+        books = response.json()
+        assert book not in books
+        assert len(books) == 2
+        assert books[0]["title"] == "unavailable"
+        assert books[0]["rating"] == 4
+        assert books[1]["title"] == "Thalasseus maximus"
+        assert books[1]["rating"] == 2.5
 
     def test_get_books_by_author_id(self):
         """tests get method to show books by their author id"""
-        with TestClient(app) as client:
-            author_id = 2
-            response = client.get(f"/books/authors/{author_id}")
-            assert response.status_code == 200
-            books = response.json()
-            assert len(books) == 3
-            authors_books = ["Dendrocygna viduata", "Paroaria gularis", "unavailable"]
-            assert books[0]["title"] in authors_books
-            assert books[1]["title"] in authors_books
-            assert books[2]["title"] in authors_books
-            author_id = 1  # all books
-            response = client.get(f"/books/authors/{author_id}")
-            assert response.status_code == 200
-            books = response.json()
-            assert len(books) == 10
+        author_id = 2
+        response = client.get(f"/books/authors/{author_id}")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 3
+        authors_books = ["Dendrocygna viduata", "Paroaria gularis", "unavailable"]
+        assert books[0]["title"] in authors_books
+        assert books[1]["title"] in authors_books
+        assert books[2]["title"] in authors_books
+        author_id = 1  # all books
+        response = client.get(f"/books/authors/{author_id}")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 10
 
     def test_update_book(self):
         """tests put method to update book by its id"""
 
-        with TestClient(app) as client:
-            book_id = 1
-            updated_book = {
-                "title": "updated title",
-                "year": 1999,
-                "genre": BookGenre.FANTASY,
-                "author_id": [2],
-            }
-            response = client.put(f"/books/{book_id}", json=updated_book)
-            assert response.status_code == 202
-            book = response.json()
-            assert book["title"] == updated_book["title"]
-            assert book["authors"][0]["id"] == 2
-            # books by author1 decreased by 1
-            response = client.get("/books/authors/1")
-            assert response.status_code == 200
-            books = response.json()
-            assert len(books) == 9
-            # book_id not exist
-            book_id = 12
-            response = client.put(f"/books/{book_id}", json=updated_book)
-            assert response.status_code == 404
-            assert response.json()["detail"] == f"Book with id {book_id} is not found"
-            # authors not exist
-            updated_book["author_id"] = [5]
-            book_id = 1
-            response = client.put(f"/books/{book_id}", json=updated_book)
-            assert response.status_code == 404
-            assert response.json()["detail"] == "Authors is not found"
+        book_id = 1
+        updated_book = {
+            "title": "updated title",
+            "year": 1999,
+            "genre": BookGenre.FANTASY,
+            "author_id": [2],
+        }
+        response = client.put(f"/books/{book_id}", json=updated_book)
+        assert response.status_code == 202
+        book = response.json()
+        assert book["title"] == updated_book["title"]
+        assert book["authors"][0]["id"] == 2
+        # books by author1 decreased by 1
+        response = client.get("/books/authors/1")
+        assert response.status_code == 200
+        books = response.json()
+        assert len(books) == 9
+        # book_id not exist
+        book_id = 12
+        response = client.put(f"/books/{book_id}", json=updated_book)
+        assert response.status_code == 404
+        assert response.json()["detail"] == f"Book with id {book_id} is not found"
+        # authors not exist
+        updated_book["author_id"] = [5]
+        book_id = 1
+        response = client.put(f"/books/{book_id}", json=updated_book)
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Authors is not found"
