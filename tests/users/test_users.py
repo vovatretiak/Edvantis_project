@@ -1,11 +1,45 @@
+import pytest
 from fastapi.testclient import TestClient
 
+from ..db_for_tests import override_get_db
 from main import app
+from project.models import User
 from project.utils import create_access_token
+from project.utils import get_password_hash
 from project.utils import verify_password
 
-
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True, scope="class")
+def create_dummy_users():
+    """fixture to execute asserts before and after a test is run"""
+
+    db = next(override_get_db())
+    new_user = User(
+        username="john123",
+        email="john123@mail.com",
+        password=get_password_hash("password"),
+    )
+    new_user2 = User(
+        username="jane123",
+        email="jane123@mail.com",
+        password=get_password_hash("password2"),
+    )
+    db.add(new_user)
+    db.add(new_user2)
+    db.commit()
+    yield
+
+    # teardown
+    db.query(User).filter(User.username == "john123").delete()
+    db.query(User).filter(User.username == "jane123").delete()
+    db.commit()
+
+
+@pytest.mark.usefixtures("create_dummy_users")
+class TestUser:
+    """tests user methods"""
 
 
 def test_all_users():
