@@ -64,4 +64,20 @@ class TestReview:
 
     def test_review_get_by_id(self):
         """tests get method to show review by its id"""
-        pass
+        user_access_token = create_access_token("john123")
+        review_id = 9
+        response = client.get(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+        )
+        assert response.status_code == 200
+        review = response.json()
+        assert review["text"] == "new review"
+        assert review["rating"] == 5
+        # id not exits
+        review_id = 100
+        response = client.get(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+        )
+        assert response.status_code == 404
