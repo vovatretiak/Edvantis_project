@@ -81,3 +81,43 @@ class TestReview:
             headers={"Authorization": f"Bearer {user_access_token}"},
         )
         assert response.status_code == 404
+
+    def test_update_review(self):
+        """tests put method to update review by its id"""
+        user_access_token = create_access_token("john123")
+        review_id = 9
+        payload = {"text": "updated review", "rating": ReviewRating.FOUR}
+        response = client.put(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+            json=payload,
+        )
+        assert response.status_code == 202
+        review = response.json()
+        assert review["text"] == "updated review"
+        assert review["rating"] == 4
+        # id not exits
+        review_id = 100
+        response = client.put(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+            json=payload,
+        )
+        assert response.status_code == 404
+
+    def test_delete_review(self):
+        """tests delete method to delete review by its id"""
+        user_access_token = create_access_token("john123")
+        review_id = 9
+        response = client.delete(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+        )
+        assert response.status_code == 204
+        # id not exits
+        review_id = 100
+        response = client.delete(
+            f"/reviews/{review_id}",
+            headers={"Authorization": f"Bearer {user_access_token}"},
+        )
+        assert response.status_code == 404
