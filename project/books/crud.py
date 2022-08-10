@@ -182,12 +182,11 @@ def create_book(db: Session, book: schemas.BookCreate) -> models.Book:
         type=book.type,
     )
     authors = db.query(Author).filter(Author.id.in_(book.author_id))
-    if authors.count() == len(book.author_id):
-        new_book.authors.extend(authors)
-    else:
+    if authors.count() != len(book.author_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Authors is not found"
         )
+    new_book.authors.extend(authors)
     db.add(new_book)
     db.commit()
     db.refresh(new_book)

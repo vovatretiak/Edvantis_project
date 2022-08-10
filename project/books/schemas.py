@@ -71,7 +71,7 @@ class BookCreate(BookBase):
     pages, genre, type and list of authors id
     """
 
-    author_id: List[int] = []
+    author_id: List[int]
 
 
 class BookUpdate(BookBase):
