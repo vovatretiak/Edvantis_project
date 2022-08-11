@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 
 from project import database
 from project import utils
+from project.models import User
 from project.reviews import crud
 from project.reviews import schemas
-from project.users.models import User
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 

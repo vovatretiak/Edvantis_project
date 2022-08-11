@@ -5,10 +5,10 @@ from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from project.authors.models import Author
-from project.books import models
+from project import models
 from project.books import schemas
-from project.reviews.models import Review
+from project.models import Author
+from project.models import Review
 
 
 def get_book_by_id(db: Session, book_id: int) -> models.Book:
@@ -84,6 +84,11 @@ def get_books_by_author_id(db: Session, author_id: int) -> List[models.Book]:
         List[models.Book]: returns list of instances of Book model
     """
     author = db.query(Author).filter(Author.id == author_id).first()
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author with id {author_id} is not found",
+        )
     return author.books
 
 
@@ -98,7 +103,9 @@ def get_books(db: Session, offset: int, limit: int) -> List[models.Book]:
     Returns:
         List[models.Book]: returns list of instances of Book model
     """
-    return db.query(models.Book).offset(offset).limit(limit).all()
+    return (
+        db.query(models.Book).order_by(models.Book.id).offset(offset).limit(limit).all()
+    )
 
 
 def get_books_by_rating(
@@ -182,12 +189,11 @@ def create_book(db: Session, book: schemas.BookCreate) -> models.Book:
         type=book.type,
     )
     authors = db.query(Author).filter(Author.id.in_(book.author_id))
-    if authors.count() == len(book.author_id):
-        new_book.authors.extend(authors)
-    else:
+    if authors.count() != len(book.author_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Authors is not found"
         )
+    new_book.authors.extend(authors)
     db.add(new_book)
     db.commit()
     db.refresh(new_book)

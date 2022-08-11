@@ -4,8 +4,9 @@ from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy.orm import Session
 
-from project.authors import models
+from project import models
 from project.authors import schemas
+from project.models import Book
 
 
 def create_author(db: Session, author: schemas.AuthorCreate) -> models.Author:
@@ -109,10 +110,14 @@ def delete_author(db: Session, author_id: int) -> None:
         HTTPException: Handles no value
     """
     author = db.query(models.Author).filter(models.Author.id == author_id)
-    if not author:
+    if not author.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Author with id {author_id} is not found",
         )
+    for book in author.first().books:
+        if len(book.authors) <= 1:
+            delete_book = db.query(Book).filter(Book.id == book.id)
+            delete_book.delete()
     author.delete()
     db.commit()

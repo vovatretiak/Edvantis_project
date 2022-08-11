@@ -5,10 +5,10 @@ from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
-from project.books.models import Book
-from project.reviews import models
+from project import models
+from project.models import Book
+from project.models import User
 from project.reviews import schemas
-from project.users.models import User
 from project.utils import get_user_rank
 
 

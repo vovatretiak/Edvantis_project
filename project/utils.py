@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from project import database
 from project import schemas
-from project.users.models import User
+from project.models import User
 from project.users.schemas import UserRank
 
 
@@ -122,23 +122,25 @@ def get_user_rank(reviews_number: int):
     Returns:
        user rank
     """
+    rank = None
     if reviews_number < 5:
-        return UserRank.KYU_9
+        rank = UserRank.KYU_9
     elif reviews_number < 10:
-        return UserRank.KYU_8
+        rank = UserRank.KYU_8
     elif reviews_number < 20:
-        return UserRank.KYU_7
+        rank = UserRank.KYU_7
     elif reviews_number < 30:
-        return UserRank.KYU_6
+        rank = UserRank.KYU_6
     elif reviews_number < 40:
-        return UserRank.KYU_5
+        rank = UserRank.KYU_5
     elif reviews_number < 50:
-        return UserRank.KYU_4
+        rank = UserRank.KYU_4
     elif reviews_number < 60:
-        return UserRank.KYU_3
+        rank = UserRank.KYU_3
     elif reviews_number < 70:
-        return UserRank.KYU_2
+        rank = UserRank.KYU_2
     elif reviews_number < 90:
-        return UserRank.KYU_1
+        rank = UserRank.KYU_1
     elif reviews_number > 100:
-        return UserRank.DAN_1
+        rank = UserRank.DAN_1
+    return rank

@@ -9,10 +9,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from project import database
+from project import models
 from project import utils
 from project.schemas import Token
 from project.users import crud
-from project.users import models
 from project.users import schemas
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -61,7 +61,7 @@ def login(
     hashed_pw = user.password
     if not utils.verify_password(form_data.password, hashed_pw):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password"
         )
     access_token = utils.create_access_token(subject=form_data.username)
     return Token(access_token=access_token, token_type="bearer")

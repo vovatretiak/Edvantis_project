@@ -22,4 +22,4 @@ def root():
     """
     default message
     """
-    return {"message": "Hello World"}
+    return {"message": "Hello Edvantis"}
