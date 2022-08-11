@@ -10,13 +10,13 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv(find_dotenv())
 
 DB_USER = "postgres"
-DB_PASS = os.environ.get("pass")
-DB_HOST = "localhost"
+DB_PASS = os.environ.get("DB_PASS")
+DB_HOST = "db"
 DB_PORT = "5432"
 DB_NAME = "edvantis_project"
 
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
