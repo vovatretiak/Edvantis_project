@@ -4,7 +4,8 @@ from fastapi.testclient import TestClient
 from main import app
 
 client = TestClient(app)
-from ..db_for_tests import override_get_db
+from ..db_for_tests import override_get_db, engine
+from project.database import Base
 from project.models import Author
 
 db = next(override_get_db())
@@ -13,7 +14,8 @@ db = next(override_get_db())
 @pytest.fixture(autouse=True, scope="package")
 def create_dummy_authors():
     """fixture to execute asserts before and after a test is run"""
-
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     author = Author(
         first_name="Averell",
         last_name="Povah",
