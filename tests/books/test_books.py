@@ -58,7 +58,7 @@ def create_dummy_books():
     db.add(author2)
     db.commit()
 
-    with open("E:\\vscode\\edvantis_project\\books.json", encoding="utf8") as file:
+    with open("/app/books.json", encoding="utf8") as file:
         books = json.load(file)
     for book in books[:10]:
         new_book = Book(

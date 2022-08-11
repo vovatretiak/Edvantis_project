@@ -13,7 +13,7 @@ from project.utils import verify_password
 client = TestClient(app)
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True, scope="class")
 def create_dummy_users():
     """fixture to execute asserts before and after a test is run"""
     Base.metadata.drop_all(bind=engine)

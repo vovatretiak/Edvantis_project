@@ -11,7 +11,7 @@ from project.models import Author
 db = next(override_get_db())
 
 
-@pytest.fixture(autouse=True, scope="package")
+@pytest.fixture(autouse=True, scope="class")
 def create_dummy_authors():
     """fixture to execute asserts before and after a test is run"""
     Base.metadata.drop_all(bind=engine)
