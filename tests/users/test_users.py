@@ -1,8 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from ..db_for_tests import engine
 from ..db_for_tests import override_get_db
 from main import app
+from project.database import Base
 from project.models import User
 from project.utils import create_access_token
 from project.utils import get_password_hash
@@ -14,6 +16,8 @@ client = TestClient(app)
 @pytest.fixture(autouse=True, scope="session")
 def create_dummy_users():
     """fixture to execute asserts before and after a test is run"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     db = next(override_get_db())
     new_user = User(

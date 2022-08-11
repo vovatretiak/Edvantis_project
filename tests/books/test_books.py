@@ -3,9 +3,11 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
+from ..db_for_tests import engine
 from ..db_for_tests import override_get_db
 from main import app
 from project.books.schemas import BookGenre
+from project.database import Base
 from project.models import Author
 from project.models import Book
 from project.models import Review
@@ -24,6 +26,8 @@ db = next(override_get_db())
 @pytest.fixture(autouse=True, scope="class")
 def create_dummy_books():
     """fixture to execute asserts before and after a test is run"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     new_user = User(
         username="john123",
