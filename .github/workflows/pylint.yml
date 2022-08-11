@@ -16,4 +16,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --disable=too-few-public-methods --fail-under=9
+       pylint project/ --disable=too-few-public-methods --fail-under=9 
