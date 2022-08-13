@@ -47,8 +47,7 @@ class BookBase(BaseModel):
     type: BookType
 
     @validator("year")
-    @classmethod
-    def year_validation(cls, value):
+    def year_validation(cls, value: int):
         """checks if year is valid"""
         if value > 2022:
             raise ValueError("The year cannot be greater than the current one")
@@ -57,8 +56,7 @@ class BookBase(BaseModel):
         return value
 
     @validator("pages")
-    @classmethod
-    def pages_validation(cls, value):
+    def pages_validation(cls, value: int):
         """check if number of pages is valid"""
         if value < 15:
             raise ValueError("There cannot be less than 15 pages")

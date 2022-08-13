@@ -3,6 +3,7 @@ from enum import IntEnum
 from typing import Union
 
 from pydantic import BaseModel
+from pydantic import validator
 
 
 class ReviewRating(IntEnum):
@@ -33,6 +34,13 @@ class ReviewCreate(ReviewBase):
     """
 
     book_id: int
+
+    @validator("book_id")
+    def book_id_validation(cls, value: int):
+        """check if booj id is valid"""
+        if value < 1:
+            raise ValueError("Id cannot be less then 1")
+        return value
 
 
 class ReviewUpdate(ReviewBase):

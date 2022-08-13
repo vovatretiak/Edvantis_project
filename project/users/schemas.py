@@ -36,7 +36,6 @@ class UserBase(BaseModel):
     password: str
 
     @validator("username")
-    @classmethod
     def username_alphanumeric(cls, username):
         """checks if username is alphanumeric"""
         assert username.isalnum(), "must be alphanumeric"
@@ -51,7 +50,6 @@ class UserCreate(UserBase):
     confirm_password: str
 
     @root_validator
-    @classmethod
     def passwords_match(cls, values):
         """checks if the password and the confirm_password match"""
         pw1, pw2 = values.get("password"), values.get("confirm_password")
@@ -71,7 +69,6 @@ class UserUpdate(UserBase):
     confirm_password: Union[str, None] = None
 
     @root_validator
-    @classmethod
     def passwords_match(cls, values):
         """checks if the password and the confirm_password match"""
         pw1, pw2 = values.get("password", None), values.get("confirm_password", None)
