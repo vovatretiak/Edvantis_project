@@ -21,6 +21,9 @@ jobs:
 
     - name: Build docker images
       run: docker-compose build
+    
+    - name: Start docker images
+      run: docker-compose up
 
     - name: Run tests
       run: docker compose exec edvantis_project python -m pytest tests
