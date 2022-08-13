@@ -111,8 +111,8 @@ class Review(Base):
     created_at = Column(DateTime, default=datetime.now)
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"))
 
-    book = relationship("Book", back_populates="reviews")
-    user = relationship("User", back_populates="reviews")
+    # book = relationship("Book", back_populates="reviews")
+    # user = relationship("User", back_populates="reviews")
 
     def __repr__(self) -> str:
         return f"Review(id={self.id}, user_id={self.user_id}, created_at={self.created_at})"

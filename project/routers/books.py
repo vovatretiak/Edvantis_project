@@ -1,4 +1,5 @@
 from typing import List
+from typing import Union
 
 from fastapi import APIRouter
 from fastapi import Depends
@@ -37,6 +38,8 @@ def create_book(
 @router.get("/", response_model=List[schemas.Book], status_code=status.HTTP_200_OK)
 def get_all_books(
     db: Session = Depends(get_db),
+    genre: Union[schemas.BookGenre, None] = None,
+    type: Union[schemas.BookType, None] = None,
     offset: int = 0,
     limit: int = Query(default=10, lte=15),
 ) -> List[schemas.Book]:
@@ -50,7 +53,7 @@ def get_all_books(
     Returns:
         List[schemas.Book]
     """
-    return crud.get_books(db=db, offset=offset, limit=limit)
+    return crud.get_books(db=db, offset=offset, limit=limit, genre=genre, type=type)
 
 
 @router.get(

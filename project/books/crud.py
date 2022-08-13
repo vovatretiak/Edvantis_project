@@ -1,4 +1,5 @@
 from typing import List
+from typing import Union
 
 from fastapi import HTTPException
 from fastapi import status
@@ -92,7 +93,13 @@ def get_books_by_author_id(db: Session, author_id: int) -> List[models.Book]:
     return author.books
 
 
-def get_books(db: Session, offset: int, limit: int) -> List[models.Book]:
+def get_books(
+    db: Session,
+    offset: int,
+    limit: int,
+    genre: Union[schemas.BookGenre, None],
+    type: Union[schemas.BookType, None],
+) -> List[models.Book]:
     """gets list of instances of Book model from database
 
     Args:
@@ -103,9 +110,12 @@ def get_books(db: Session, offset: int, limit: int) -> List[models.Book]:
     Returns:
         List[models.Book]: returns list of instances of Book model
     """
-    return (
-        db.query(models.Book).order_by(models.Book.id).offset(offset).limit(limit).all()
-    )
+    books = db.query(models.Book).order_by(models.Book.id)
+    if genre:
+        books = books.filter(models.Book.genre == genre)
+    if type:
+        books = books.filter(models.Book.type == type)
+    return books.offset(offset).limit(limit).all()
 
 
 def get_books_by_rating(
