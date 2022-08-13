@@ -64,6 +64,7 @@ def get_all_books(
 def get_books_with_rating(
     rating: int = Path(title="The rating of the book", ge=1, le=5),
     db: Session = Depends(get_db),
+    genre: Union[schemas.BookGenre, None] = None,
     offset: int = 0,
     limit: int = Query(default=3, lte=5),
 ) -> List[schemas.Book]:
@@ -78,7 +79,9 @@ def get_books_with_rating(
     Returns:
         List[schemas.Book]
     """
-    return crud.get_books_by_rating(db=db, rating=rating, offset=offset, limit=limit)
+    return crud.get_books_by_rating(
+        db=db, rating=rating, offset=offset, limit=limit, genre=genre
+    )
 
 
 @router.get(

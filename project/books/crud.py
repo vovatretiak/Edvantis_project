@@ -106,6 +106,8 @@ def get_books(
         db (Session): Manages persistence operations for ORM-mapped objects
         offset (int): Query parameter, the number of items to skip before returning
         limit (int): Query parameter, the number of items returned from a query
+        genre (Union[schemas.BookGenre, None]): filter by genre
+        type (Union[schemas.BookType, None]): filter by type
 
     Returns:
         List[models.Book]: returns list of instances of Book model
@@ -119,7 +121,11 @@ def get_books(
 
 
 def get_books_by_rating(
-    db: Session, rating: int, offset: int, limit: int
+    db: Session,
+    rating: int,
+    offset: int,
+    limit: int,
+    genre: Union[schemas.BookGenre, None],
 ) -> List[models.Book]:
     """gets list of instances of Book model from database with specific rating
 
@@ -128,13 +134,16 @@ def get_books_by_rating(
         rating (int): Path parameter, value limit of needed rating
         offset (int): Query parameter, the number of items to skip before returning
         limit (int): Query parameter, the number of items returned from a query
+        genre (Union[schemas.BookGenre, None]): filter by genre
 
     Returns:
         List[models.Book]: returns list of instances of Book model with specific rating
     """
+    books = db.query(models.Book)
+    if genre:
+        books.filter(models.Book.genre == genre)
     books = (
-        db.query(models.Book)
-        .where(models.Book.rating >= rating)
+        books.where(models.Book.rating >= rating)
         .order_by(models.Book.rating.asc())
         .offset(offset)
         .limit(limit)
