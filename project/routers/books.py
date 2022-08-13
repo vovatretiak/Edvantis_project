@@ -49,7 +49,8 @@ def get_all_books(
         db (Session, optional): Defaults to Depends(get_db).
         offset (int, optional):  Defaults to 0.
         limit (int, optional):  Defaults to Query(default=10, lte=15).
-
+        genre (Union[schemas.BookGenre, None]): filter by genre
+        type (Union[schemas.BookType, None]): filter by type
     Returns:
         List[schemas.Book]
     """
@@ -75,6 +76,7 @@ def get_books_with_rating(
         db (Session, optional): Defaults to Depends(get_db).
         offset (int, optional): Defaults to 0.
         limit (int, optional): Defaults to Query(default=3, lte=5).
+        genre (Union[schemas.BookGenre, None]): filter by genre
 
     Returns:
         List[schemas.Book]
