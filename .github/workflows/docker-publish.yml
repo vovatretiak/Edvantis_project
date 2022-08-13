@@ -23,4 +23,4 @@ jobs:
       run: docker-compose build
 
     - name: Run tests
-      run: docker exec app python -m pytest tests
+      run: docker exec edvantis_project_app python -m pytest tests
